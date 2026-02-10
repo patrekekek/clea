@@ -1,18 +1,25 @@
-import { useState } from "react"
-import { View, Text, TextInput, Pressable } from "react-native"
-import { Score, SummativeNumber } from "./types/score"
-import ScoreList from "./ScoreList"
-import { useScores } from "./context/ScoresContext"
+import { useState } from "react";
+import { View, Text, TextInput, Pressable } from "react-native";
+import { Score, SummativeNumber } from "./types/score";
+import ScoreList from "./ScoreList";
+import { useScores } from "./context/ScoresContext";
 
-type ScoreKind = "summative" | "performance" | "quarterly"
+//for table
+import { buildScoreRows } from "./features/scores/selectors";
+import { countScoresByType } from "./features/scores/summary";
+
+type ScoreKind = "summative" | "performance" | "quarterly";
 
 export default function Main() {
-  const { scores, addScore, updateScore, deleteScore } = useScores()
+  const { scores, addScore, updateScore, deleteScore } = useScores();
 
-  const [studentName, setStudentName] = useState("")
-  const [type, setType] = useState<ScoreKind>("summative")
-  const [summativeNo, setSummativeNo] = useState<SummativeNumber>(1)
-  const [score, setScore] = useState("")
+  const [studentName, setStudentName] = useState("");
+  const [type, setType] = useState<ScoreKind>("summative");
+  const [summativeNo, setSummativeNo] = useState<SummativeNumber>(1);
+  const [score, setScore] = useState("");
+
+  console.log("Rows", buildScoreRows(scores));
+  console.log("Summar", countScoresByType(scores));
 
   function isDuplicate(newScore: Score) {
     return scores.some(s => {
