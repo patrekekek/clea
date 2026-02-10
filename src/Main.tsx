@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, Text, TextInput, Pressable } from "react-native";
+import { View, Text, TextInput, Pressable, ScrollView } from "react-native";
 import { Score, SummativeNumber } from "./types/score";
 import ScoreList from "./ScoreList";
 import { useScores } from "./context/ScoresContext";
@@ -7,6 +7,7 @@ import { useScores } from "./context/ScoresContext";
 //for table
 import { buildScoreRows } from "./features/scores/selectors";
 import { countScoresByType } from "./features/scores/summary";
+import ScoreTable from "./features/scores/ScoreTable";
 
 type ScoreKind = "summative" | "performance" | "quarterly";
 
@@ -17,6 +18,8 @@ export default function Main() {
   const [type, setType] = useState<ScoreKind>("summative");
   const [summativeNo, setSummativeNo] = useState<SummativeNumber>(1);
   const [score, setScore] = useState("");
+
+  const rows = buildScoreRows(scores);
 
   console.log("Rows", buildScoreRows(scores));
   console.log("Summar", countScoresByType(scores));
@@ -67,7 +70,7 @@ export default function Main() {
   }
 
   return (
-    <View style={{ padding: 24, gap: 8 }}>
+    <ScrollView style={{ padding: 24, gap: 8 }}>
       <Text style={{ fontSize: 18 }}>Record Score (MVP)</Text>
 
       <TextInput
@@ -135,6 +138,10 @@ export default function Main() {
         onUpdate={updateScore}
         onDelete={deleteScore}
       />
-    </View>
+
+      <ScoreTable
+        rows={rows}
+      />
+    </ScrollView>
   )
 }
