@@ -1,7 +1,11 @@
 import { useState } from "react";
 import { View, Text, TextInput, Pressable, ScrollView } from "react-native";
 import { Score, SummativeNumber } from "./types/score";
+
 import ScoreList from "./ScoreList";
+import AttendanceMVP from "./AttendanceMVP";
+
+//context
 import { useScores } from "./context/ScoresContext";
 
 //for table
@@ -142,6 +146,8 @@ export default function Main() {
       <ScoreTable
         rows={rows}
       />
+
+      <AttendanceMVP/>
     </ScrollView>
   )
 }

@@ -15,6 +15,7 @@ export function buildScoreRows(scores: Score[]): ScoreRow[] {
     const map = new Map<string, ScoreRow>();
 
     scores.forEach(score => {
+        //making sure the student exists
         if (!map.has(score.studentName)) {
             map.set(score.studentName, {
                 studentName: score.studentName,
