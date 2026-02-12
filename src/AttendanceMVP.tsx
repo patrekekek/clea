@@ -3,6 +3,8 @@ import { View, Text, TextInput, Pressable } from "react-native";
 import { AttendanceStatus } from "./types/attendance";
 import { useAttendance } from "./context/AttendanceContext";
 
+import { buildAttendanceSummary, flagAttendance } from "./features/attendance/summary";
+
 const today = () => new Date().toISOString().slice(0, 10);
 
 export default function AttendanceMVP() {
@@ -10,6 +12,13 @@ export default function AttendanceMVP() {
 
   const [studentName, setStudentName] = useState("");
   const [status, setStatus] = useState<AttendanceStatus>("present");
+
+  //for testing attendance features
+  const summaries = buildAttendanceSummary(records);
+  const flags = flagAttendance(records)
+
+  console.log("Attendance Summary:", summaries);
+  console.log("Attendance Flags", flags)
   
   function recordAttendance() {
     const date = today();
