@@ -19,7 +19,7 @@ export default function AttendanceMVP() {
 
   console.log("Attendance Summary:", summaries);
   console.log("Attendance Flags", flags)
-  
+
   function recordAttendance() {
     const date = today();
 

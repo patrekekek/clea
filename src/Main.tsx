@@ -7,16 +7,21 @@ import AttendanceMVP from "./AttendanceMVP";
 
 //context
 import { useScores } from "./context/ScoresContext";
+import { useAttendance } from "./context/AttendanceContext";
 
 //for table
 import { buildScoreRows } from "./features/scores/selectors";
 import { countScoresByType } from "./features/scores/summary";
 import ScoreTable from "./features/scores/ScoreTable";
 
+//for attendance
+import AttendanceSummaryView from "./features/attendance/AttendanceSummaryView";
+
 type ScoreKind = "summative" | "performance" | "quarterly";
 
 export default function Main() {
   const { scores, addScore, updateScore, deleteScore } = useScores();
+  const { records } = useAttendance();
 
   const [studentName, setStudentName] = useState("");
   const [type, setType] = useState<ScoreKind>("summative");
@@ -148,6 +153,7 @@ export default function Main() {
       />
 
       <AttendanceMVP/>
+      <AttendanceSummaryView records={records} />
     </ScrollView>
   )
 }
