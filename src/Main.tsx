@@ -24,11 +24,32 @@ export default function Main() {
   const { records } = useAttendance();
 
   const [studentName, setStudentName] = useState("");
+  const [ subject, setSubject ] = useState("")
   const [type, setType] = useState<ScoreKind>("summative");
   const [summativeNo, setSummativeNo] = useState<SummativeNumber>(1);
   const [score, setScore] = useState("");
 
-  const rows = buildScoreRows(scores);
+  const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
+
+  const filteredScores = selectedSubject
+    ? scores.filter(score => score.subject === selectedSubject)
+    : [];
+
+  const rows = buildScoreRows(filteredScores);
+
+  //for table
+  const subjects = [
+    "Filipino",
+    "English",
+    "Math",
+    "Science",
+    "Araling Panlipunan",
+    "Values Education",
+    "TLE",
+    "MAPEH"
+  ];
+
+
 
   console.log("Rows", buildScoreRows(scores));
   console.log("Summar", countScoresByType(scores));
@@ -36,11 +57,13 @@ export default function Main() {
   function isDuplicate(newScore: Score) {
     return scores.some(s => {
       if (s.studentName !== newScore.studentName) return false
+          if (s.subject !== newScore.subject) return false;
       if (s.type !== newScore.type) return false
 
       if (s.type === "summative" && newScore.type === "summative") {
         return s.summativeNo === newScore.summativeNo
       }
+  
 
       return true
     })
@@ -53,6 +76,7 @@ export default function Main() {
       newScore = {
         id: crypto.randomUUID(),
         studentName,
+        subject,
         type,
         summativeNo,
         score: Number(score),
@@ -61,6 +85,7 @@ export default function Main() {
       newScore = {
         id: crypto.randomUUID(),
         studentName,
+        subject,
         type,
         score: Number(score),
       }
@@ -86,6 +111,13 @@ export default function Main() {
         placeholder="Student name"
         value={studentName}
         onChangeText={setStudentName}
+        style={{ borderWidth: 1, padding: 8 }}
+      />
+
+      <TextInput
+        placeholder="Subject"
+        value={subject}
+        onChangeText={setSubject}
         style={{ borderWidth: 1, padding: 8 }}
       />
 
@@ -148,9 +180,37 @@ export default function Main() {
         onDelete={deleteScore}
       />
 
-      <ScoreTable
-        rows={rows}
-      />
+      <View style={{ marginTop: 24 }}>
+        <Text style={{ marginBottom: 6 }}>Select Subject:</Text>
+
+        <View style={{ flexDirection: "row", gap: 8, flexWrap: "wrap" }}>
+          {subjects.map(sub => (
+            <Pressable
+              key={sub}
+              onPress={() => setSelectedSubject(sub)}
+              style={{
+                padding: 8,
+                backgroundColor:
+                  selectedSubject === sub ? "#333" : "#ddd",
+              }}
+            >
+              <Text
+                style={{
+                  color: selectedSubject === sub ? "#fff" : "#000",
+                }}
+              >
+                {sub}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+      </View>
+
+      { selectedSubject && (
+        <ScoreTable rows={rows} />
+      )}
+      
+
 
       <AttendanceMVP/>
       <AttendanceSummaryView records={records} />

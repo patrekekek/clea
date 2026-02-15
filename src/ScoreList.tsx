@@ -87,6 +87,7 @@ export default function ScoreList({ scores, onUpdate, onDelete }: Props) {
             ) : (
               <>
                 <Text>Student: {score.studentName}</Text>
+                <Text>Subject: {score.subject}</Text>
                 <Text>Type: {score.type}</Text>
 
                 {score.type === "summative" && (

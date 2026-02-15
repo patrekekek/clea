@@ -1,4 +1,4 @@
-import { View, Text } from "react-native";
+import { View, Text, Pressable } from "react-native";
 import { ScoreRow } from "./selectors"; //type
 
 type Props = {
@@ -8,6 +8,7 @@ type Props = {
 export default function ScoreTable({ rows }: Props) {
   return (
     <View style={{ marginTop: 24 }}>
+
       {/* Header */}
       <View
         style={{
