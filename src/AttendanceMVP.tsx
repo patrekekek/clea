@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { View, Text, TextInput, Pressable } from "react-native";
-import { AttendanceStatus } from "./types/attendance";
-import { useAttendance } from "./context/AttendanceContext";
+import { AttendanceStatus } from "../types/attendance";
+import { useAttendance } from "../context/AttendanceContext";
 
-import { buildAttendanceSummary, flagAttendance } from "./features/attendance/summary";
+import { buildAttendanceSummary, flagAttendance } from "../features/attendance/summary";
 
 const today = () => new Date().toISOString().slice(0, 10);
 

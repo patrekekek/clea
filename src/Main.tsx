@@ -1,26 +1,26 @@
 import { useState } from "react";
 import { View, Text, TextInput, Pressable, ScrollView, StyleSheet, TouchableOpacity} from "react-native";
-import { Score, SummativeNumber } from "./types/score";
-import { Student } from "./types/student";
+import { Score, SummativeNumber } from "../types/score";
+import { Student } from "../types/student";
 
-import ScoreList from "./ScoreList";
+// import ScoreList from "./ScoreList";
 import AttendanceMVP from "./AttendanceMVP";
 
 //context
-import { useStudents } from "./context/StudentContext";
-import { useScores } from "./context/ScoresContext";
-import { useAttendance } from "./context/AttendanceContext";
+import { useStudents } from "../context/StudentContext";
+import { useScores } from "../context/ScoresContext";
+import { useAttendance } from "../context/AttendanceContext";
 
 //theme
-import { colors } from "./theme/colors";
+import { colors } from "../theme/colors";
 
 //for table
-import { buildScoreRows } from "./features/scores/selectors";
-import { countScoresByType } from "./features/scores/summary";
-import ScoreTable from "./features/scores/ScoreTable";
+import { buildScoreRows } from "../features/scores/selectors";
+import { countScoresByType } from "../features/scores/summary";
+import ScoreTable from "../features/scores/ScoreTable";
 
 //for attendance
-import AttendanceSummaryView from "./features/attendance/AttendanceSummaryView";
+import AttendanceSummaryView from "../features/attendance/AttendanceSummaryView";
 
 type ScoreKind = "summative" | "performance" | "quarterly";
 
@@ -110,6 +110,7 @@ export default function Main() {
 
     if (type === "summative") {
       newScore = {
+        //add the name here
         id: crypto.randomUUID(),
         studentId: selectedStudent,
         subject,

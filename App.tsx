@@ -1,6 +1,6 @@
-import { StudentProvider } from "./src/context/StudentContext";
-import { ScoresProvider } from "./src/context/ScoresContext";
-import { AttendanceProvider } from "./src/context/AttendanceContext";
+import { StudentProvider } from "./context/StudentContext";
+import { ScoresProvider } from "./context/ScoresContext";
+import { AttendanceProvider } from "./context/AttendanceContext";
 
 import Main from "./src/Main";
 
