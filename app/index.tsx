@@ -4,7 +4,7 @@ import { Score, SummativeNumber } from "../types/score";
 import { Student } from "../types/student";
 
 // import ScoreList from "./ScoreList";
-import AttendanceMVP from "./AttendanceMVP";
+import AttendanceMVP from "../components/AttendanceMVP";
 
 //context
 import { useStudents } from "../context/StudentContext";
@@ -24,7 +24,7 @@ import AttendanceSummaryView from "../features/attendance/AttendanceSummaryView"
 
 type ScoreKind = "summative" | "performance" | "quarterly";
 
-export default function Main() {
+export default function Index() {
   const { students, addStudent } = useStudents();
   const { scores, addScore, updateScore, deleteScore } = useScores();
   const { records } = useAttendance();
