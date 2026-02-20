@@ -8,7 +8,16 @@ export default function RootLayout() {
     <StudentProvider>
       <ScoresProvider>
         <AttendanceProvider>
-          <Stack screenOptions={{ headerShown: false }} />
+          <Stack screenOptions={{ 
+            headerShown: false,
+            gestureEnabled: true,
+            gestureDirection: "horizontal"
+            }}>
+
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          
+          
+          </Stack>
         </AttendanceProvider>
       </ScoresProvider>
     </StudentProvider>
