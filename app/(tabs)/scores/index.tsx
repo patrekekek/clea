@@ -64,30 +64,38 @@ export default function ScoresPage() {
   }
 
   function recordScore() {
-    if (!selectedStudent || !subject || !score) return
+    if (!selectedStudent || !subject || !score ) return;
 
-    const baseScore = {
-      id: crypto.randomUUID(),
-      studentId: selectedStudent,
-      subject,
-      type,
-      score: Number(score),
+    let newScore: Score;
+
+    if (type === "summative") {
+      newScore = {
+        id: crypto.randomUUID(),
+        studentId: selectedStudent, //need to change to name here
+        subject,
+        type: "summative",
+        summativeNo,
+        score: Number(score)
+      }
+    } else {
+      newScore = {
+        id: crypto.randomUUID(),
+        studentId: selectedStudent,
+        subject,
+        type,
+        score: Number(score)
+      }
     }
-
-    const newScore: Score =
-      type === "summative"
-        ? { ...baseScore, summativeNo }
-        : baseScore
 
     if (isDuplicate(newScore)) {
-      alert("Duplicate score detected.")
-      return
+      alert("Duplicate score detected");
+      return;
     }
 
-    addScore(newScore)
-
-    setScore("")
+    addScore(newScore);
+    setScore("");
     setSummativeNo(1)
+
   }
 
   function getFullName(student: Student | string) {
