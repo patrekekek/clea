@@ -40,7 +40,7 @@ export default function TabsLayout() {
         }}
       />
 
-      <Tabs.Screen
+      {/* <Tabs.Screen
         name="students"
         options={{
           title: "Students",
@@ -48,7 +48,7 @@ export default function TabsLayout() {
             <Ionicons name="people" size={size} color={color} />
           ),
         }}
-      />
+      /> */}
 
       <Tabs.Screen
         name="sections"
@@ -60,7 +60,18 @@ export default function TabsLayout() {
         }}
       />
 
-      
+
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: "Profile",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="person" size={size} color={color} />
+          ),
+        }}
+      />
+
+
     </Tabs>
   )
 }
