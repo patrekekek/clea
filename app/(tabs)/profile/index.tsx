@@ -5,10 +5,15 @@ import {
   TextInput,
   Pressable,
   StyleSheet,
-} from "react-native"
+} from "react-native";
 
-import { loadTeacher, saveTeacher, TeacherProfile } from "../../../storage/teacherStorage"
-import { colors } from "../../../theme/colors"
+import { loadTeacher, saveTeacher, TeacherProfile } from "../../../storage/teacherStorage";
+import { colors } from "../../../theme/colors";
+
+//components
+import AppContainer from "../../../components/AppContainer";
+import AppHeader from "../../../components/AppHeader";
+import TopTabs from "../../../components/TopTabs";
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState<TeacherProfile>({
@@ -39,7 +44,10 @@ export default function ProfilePage() {
   }
 
   return (
-    <View style={styles.container}>
+    <AppContainer>
+      <AppHeader />
+      <TopTabs />
+
       <Text style={styles.title}>Teacher Profile</Text>
 
       <TextInput
@@ -66,7 +74,7 @@ export default function ProfilePage() {
       <Pressable style={styles.button} onPress={handleSave}>
         <Text style={{ color: "white" }}>Save</Text>
       </Pressable>
-    </View>
+  </AppContainer>
   )
 }
 

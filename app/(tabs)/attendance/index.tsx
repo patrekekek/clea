@@ -3,7 +3,13 @@ import { useAttendance } from "../../../context/AttendanceContext"
 import { useStudents } from "../../../context/StudentContext"
 
 import AttendanceMVP from "../../../components/AttendanceMVP"
-import AttendanceSummaryView from "../../../features/attendance/AttendanceSummaryView"
+import AttendanceSummaryView from "../../../features/attendance/AttendanceSummaryView";
+
+
+//components
+import AppContainer from "../../../components/AppContainer";
+import AppHeader from "../../../components/AppHeader";
+import TopTabs from "../../../components/TopTabs";
 
 import { colors } from "../../../theme/colors"
 
@@ -12,7 +18,10 @@ export default function AttendancePage() {
   const { students } = useStudents()
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <AppContainer>
+      <AppHeader />
+      <TopTabs />
+
       <Text style={styles.title}>Attendance</Text>
 
       {/* Record Attendance Section */}
@@ -28,7 +37,7 @@ export default function AttendancePage() {
           records={records}
         />
       </View>
-    </ScrollView>
+    </AppContainer>
   )
 }
 

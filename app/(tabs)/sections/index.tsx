@@ -13,7 +13,13 @@ import {
   loadSections,
   saveSections,
   Section,
-} from "../../../storage/sectionStorage"
+} from "../../../storage/sectionStorage";
+
+
+//components
+import AppContainer from "../../../components/AppContainer";
+import AppHeader from "../../../components/AppHeader";
+import TopTabs from "../../../components/TopTabs";
 
 import { colors } from "../../../theme/colors"
 
@@ -76,7 +82,10 @@ export default function SectionsPage() {
   }
 
   return (
-    <View style={styles.container}>
+    <AppContainer>
+      <AppHeader />
+      <TopTabs />
+
       <Text style={styles.title}>Sections</Text>
 
       {/* Add Section */}
@@ -110,7 +119,7 @@ export default function SectionsPage() {
           </Pressable>
         )}
       />
-    </View>
+    </AppContainer>
   )
 }
 
