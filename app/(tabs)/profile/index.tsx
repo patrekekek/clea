@@ -14,6 +14,7 @@ import { colors } from "../../../theme/colors";
 import AppContainer from "../../../components/AppContainer";
 import AppHeader from "../../../components/AppHeader";
 import TopTabs from "../../../components/TopTabs";
+import ProfileCard from "../../../components/ProfileCard";
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState<TeacherProfile>({
@@ -48,32 +49,8 @@ export default function ProfilePage() {
       <AppHeader />
       <TopTabs />
 
-      <Text style={styles.title}>Teacher Profile</Text>
+      <ProfileCard />
 
-      <TextInput
-        placeholder="Name"
-        value={profile.name}
-        onChangeText={text => setProfile({ ...profile, name: text })}
-        style={styles.input}
-      />
-
-      <TextInput
-        placeholder="Subject"
-        value={profile.subject}
-        onChangeText={text => setProfile({ ...profile, subject: text })}
-        style={styles.input}
-      />
-
-      <TextInput
-        placeholder="School"
-        value={profile.school}
-        onChangeText={text => setProfile({ ...profile, school: text })}
-        style={styles.input}
-      />
-
-      <Pressable style={styles.button} onPress={handleSave}>
-        <Text style={{ color: "white" }}>Save</Text>
-      </Pressable>
   </AppContainer>
   )
 }
