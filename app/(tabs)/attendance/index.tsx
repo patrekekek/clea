@@ -1,8 +1,8 @@
-import { ScrollView, StyleSheet, Text, View } from "react-native"
-import { useAttendance } from "../../../context/AttendanceContext"
-import { useStudents } from "../../../context/StudentContext"
+import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { useAttendance } from "../../../context/AttendanceContext";
+import { useStudents } from "../../../context/StudentContext";
 
-import AttendanceMVP from "../../../components/AttendanceMVP"
+import AttendanceMVP from "../../../components/AttendanceMVP";
 import AttendanceSummaryView from "../../../features/attendance/AttendanceSummaryView";
 
 
@@ -11,11 +11,11 @@ import AppContainer from "../../../components/AppContainer";
 import AppHeader from "../../../components/AppHeader";
 import TopTabs from "../../../components/TopTabs";
 
-import { colors } from "../../../theme/colors"
+import { colors } from "../../../theme/colors";
 
 export default function AttendancePage() {
-  const { records } = useAttendance()
-  const { students } = useStudents()
+  const { records } = useAttendance();
+  const { students } = useStudents();
 
   return (
     <AppContainer>

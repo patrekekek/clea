@@ -1,52 +1,80 @@
-import { View, Text } from 'react-native';
-import { AttendanceRecord } from '../../types/attendance';
+import { View, Text } from "react-native";
+import { AttendanceRecord } from "../../types/attendance";
+import { useStudents } from "../../context/StudentContext";
 
-import { buildAttendanceSummary, flagAttendance } from './summary';
+import {
+  buildAttendanceSummary,
+  flagAttendance,
+} from "./summary";
 
+import Card from "../../components/ui/Card";
+import { colors, spacing, typography } from "../../theme";
 
 type Props = {
-    records: AttendanceRecord[]
-}
+  records: AttendanceRecord[];
+};
 
 export default function AttendanceSummaryView({ records }: Props) {
+  const { students } = useStudents();
+
   const summaries = buildAttendanceSummary(records);
   const flags = flagAttendance(records);
 
   if (summaries.length === 0) {
-    return <Text>No attendance data yet.</Text>
+    return (
+      <Text style={{ color: colors.textSecondary }}>
+        No attendance data yet.
+      </Text>
+    );
   }
 
   return (
-    <View style={{ marginTop: 24, gap: 12 }}>
-      <Text style={{ fontSize: 18 }}>Attendance Summary</Text>
+    <View style={{ marginTop: spacing.lg, gap: spacing.md }}>
+      
+      {/* TITLE */}
+      <Text style={typography.subtitle}>Attendance Summary</Text>
 
-      {summaries.map(summary => {
-        const studentFlags = flags.get(summary.studentName)
+      {summaries.map((summary) => {
+        const student = students.find(
+          (s) => s.id === summary.studentId
+        );
+
+        const studentFlags = flags.get(summary.studentId);
 
         return (
-          <View
-            key={summary.studentName}
-            style={{ borderWidth: 1, padding: 8, gap: 4 }}
-          >
-            <Text style={{ fontWeight: "bold" }}>
-              {summary.studentName}
+          <Card key={summary.studentId}>
+            
+            {/* NAME */}
+            <Text style={{ fontWeight: "700", fontSize: 16 }}>
+              {student?.firstName || "Unknown Student"}
             </Text>
 
-            <Text>Absences: {summary.absences}</Text>
+            {/* STATS */}
+            <Text style={{ marginTop: 4 }}>
+              Absences: {summary.absences}
+            </Text>
             <Text>Lates: {summary.lates}</Text>
 
+            {/* FLAGS */}
             {studentFlags && (
-              <View style={{ marginTop: 6 }}>
-                {studentFlags.map(flag => (
-                  <Text key={flag} style={{ color: "red" }}>
+              <View style={{ marginTop: spacing.sm }}>
+                {studentFlags.map((flag) => (
+                  <Text
+                    key={flag}
+                    style={{
+                      color: colors.danger,
+                      fontWeight: "600",
+                    }}
+                  >
                     {flag}
                   </Text>
                 ))}
               </View>
             )}
-          </View>
-        )
+
+          </Card>
+        );
       })}
     </View>
-  )
+  );
 }

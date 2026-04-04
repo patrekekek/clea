@@ -4,4 +4,4 @@ export interface Student {
     lastName: string,
     middleName?: string,
     section: string
-}
+}   

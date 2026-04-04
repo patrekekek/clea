@@ -2,7 +2,7 @@ import { AttendanceRecord } from "../../types/attendance"
 import { groupAttendanceByStudent } from "./selectors"
 
 export type AttendanceSummary = {
-  studentName: string
+  studentId: string
   absences: number
   lates: number
   presents: number
@@ -20,8 +20,8 @@ export function buildAttendanceSummary(
 ): AttendanceSummary[] {
   const grouped = groupAttendanceByStudent(records)
 
-  return Array.from(grouped.entries()).map(([studentName, recs]) => ({
-    studentName,
+  return Array.from(grouped.entries()).map(([studentId, recs]) => ({
+    studentId,
     absences: recs.filter(r => r.status === "absent").length,
     lates: recs.filter(r => r.status === "late").length,
     presents: recs.filter(r => r.status === "present").length,
@@ -56,27 +56,27 @@ export function hasConsecutiveAbsences(
 
 
 export function flagAttendance(
-    records: AttendanceRecord[]
+  records: AttendanceRecord[]
 ) {
-    const grouped = groupAttendanceByStudent(records);
-    const flags = new Map<string, AttendanceFlag[]>()
+  const grouped = groupAttendanceByStudent(records);
+  const flags = new Map<string, AttendanceFlag[]>()
 
-    grouped.forEach((recs, student) => {
-        const studentFlags: AttendanceFlag[] = []
+  grouped.forEach((recs, studentId) => {
+    const studentFlags: AttendanceFlag[] = []
 
-        const absences = recs.filter(r => r.status === "absent").length
-        const lates = recs.filter(r => r.status === "late").length
+    const absences = recs.filter(r => r.status === "absent").length
+    const lates = recs.filter(r => r.status === "late").length
 
-        if (absences >= 3) studentFlags.push("frequent_absence")
-        if (lates >= 3) studentFlags.push("frequent_late")
-        if (hasConsecutiveAbsences(recs, 2)) {
-        studentFlags.push("consecutive_absence")
-        }
+    if (absences >= 3) studentFlags.push("frequent_absence")
+    if (lates >= 3) studentFlags.push("frequent_late")
+    if (hasConsecutiveAbsences(recs, 2)) {
+      studentFlags.push("consecutive_absence")
+    }
 
-        if (studentFlags.length > 0) {
-        flags.set(student, studentFlags)
-        }
-    })
+    if (studentFlags.length > 0) {
+      flags.set(studentId, studentFlags)
+    }
+  })
 
-    return flags
+  return flags
 }
