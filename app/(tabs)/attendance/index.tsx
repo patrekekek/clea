@@ -31,12 +31,12 @@ export default function AttendancePage() {
       </View>
 
       {/* Summary Section */}
-      <View style={styles.card}>
+      {/* <View style={styles.card}>
         <Text style={styles.sectionTitle}>Attendance Summary</Text>
         <AttendanceSummaryView
           records={records}
         />
-      </View>
+      </View> */}
     </AppContainer>
   )
 }

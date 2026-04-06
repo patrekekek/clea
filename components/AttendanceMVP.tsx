@@ -1,17 +1,10 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { View, Text, Pressable } from "react-native";
 import { AttendanceStatus } from "../types/attendance";
 import { useAttendance } from "../context/AttendanceContext";
-
 import { useStudents } from "../context/StudentContext";
 
-import {
-  buildAttendanceSummary,
-  flagAttendance,
-} from "../features/attendance/summary";
-
 import Card from "../components/ui/Card";
-import Input from "../components/ui/Input";
 import Button from "../components/ui/Button";
 import { colors, spacing, typography } from "../theme";
 
@@ -19,109 +12,170 @@ const today = () => new Date().toISOString().slice(0, 10);
 
 export default function AttendanceMVP() {
   const { records, addRecord, updateRecord } = useAttendance();
-
-  const [studentId, setStudentId] = useState("");
-  const [status, setStatus] = useState<AttendanceStatus>("present");
-
-  //temp sol
   const { students } = useStudents();
 
-  const summaries = buildAttendanceSummary(records);
-  const flags = flagAttendance(records);
+  const [selectedSection, setSelectedSection] = useState<string | null>(null);
+  const [index, setIndex] = useState(0);
 
-  console.log("Attendance Summary:", summaries);
-  console.log("Attendance Flags", flags);
+  // get unique sections
+  const sections = useMemo(() => {
+    return [...new Set(students.map((s) => s.section))];
+  }, [students]);
 
+  // filter students by section
+  const sortedStudents = useMemo(() => {
+    if (!selectedSection) return [];
 
-  function recordAttendance() {
+    return students
+      .filter((s) => s.section === selectedSection)
+      .sort((a, b) =>
+        `${a.lastName} ${a.firstName}`.localeCompare(
+          `${b.lastName} ${b.firstName}`
+        )
+      );
+  }, [students, selectedSection]);
+
+  const currentStudent = sortedStudents[index];
+
+  function recordAttendance(status: AttendanceStatus) {
+    if (!currentStudent) return;
+
     const date = today();
 
     const existing = records.find(
-      (r) => r.studentId === studentId && r.date === date
+      (r) =>
+        r.studentId === currentStudent.id &&
+        r.date === date
     );
 
     if (existing) {
       updateRecord({ ...existing, status });
-      return;
+    } else {
+      addRecord({
+        id: crypto.randomUUID(),
+        studentId: currentStudent.id,
+        date,
+        status,
+      });
     }
 
-    addRecord({
-      id: crypto.randomUUID(),
-      studentId,
-      date,
-      status,
-    });
-
-    setStudentId("");
+    setIndex((prev) => prev + 1);
   }
 
-  return (
-    <Card>
-      {/* TITLE */}
-      <Text style={[typography.subtitle, { marginBottom: spacing.md }]}>
-        Attendance
-      </Text>
+  function reset() {
+    setIndex(0);
+    setSelectedSection(null);
+  }
 
-      {/* INPUT */}
+  // =========================
+  // SECTION SELECT SCREEN
+  // =========================
+  if (!selectedSection) {
+    return (
+      <Card>
+        <Text style={[typography.subtitle, { marginBottom: spacing.md }]}>
+          Select Section
+        </Text>
+
         <View style={{ gap: spacing.sm }}>
-          {students.map((s) => (
+          {sections.map((section) => (
             <Pressable
-              key={s.id}
-              onPress={() => setStudentId(s.id)}
+              key={section}
+              onPress={() => setSelectedSection(section)}
               style={{
-                padding: spacing.sm,
-                borderRadius: 8,
+                padding: spacing.md,
+                borderRadius: 10,
                 borderWidth: 1,
-                borderColor:
-                  studentId === s.id ? colors.primary : colors.border,
-                backgroundColor:
-                  studentId === s.id ? colors.primary + "20" : colors.surface,
+                borderColor: colors.border,
+                backgroundColor: colors.surface,
               }}
             >
-              <Text>{s.firstName} {s.lastName}</Text>
+              <Text style={{ fontWeight: "600" }}>
+                {section.toUpperCase()}
+              </Text>
             </Pressable>
           ))}
         </View>
+      </Card>
+    );
+  }
 
-      {/* STATUS SELECT */}
-      <View style={{ flexDirection: "row", gap: spacing.sm }}>
-        {(["present", "late", "absent"] as AttendanceStatus[]).map((s) => {
-          const isActive = status === s;
+  // =========================
+  // DONE SCREEN
+  // =========================
+  if (!currentStudent) {
+    return (
+      <Card>
+        <Text style={typography.subtitle}>
+          Attendance Complete ✅
+        </Text>
 
-          return (
-            <Pressable
-              key={s}
-              onPress={() => setStatus(s)}
-              style={{
-                flex: 1,
-                padding: spacing.sm,
-                borderRadius: 8,
-                alignItems: "center",
-                backgroundColor: isActive
-                  ? colors.primary
-                  : colors.surface,
-                borderWidth: 1,
-                borderColor: isActive
-                  ? colors.primary
-                  : colors.border,
-              }}
-            >
-              <Text
-                style={{
-                  color: isActive ? "#fff" : colors.textPrimary,
-                  fontWeight: "600",
-                }}
-              >
-                {s}
-              </Text>
-            </Pressable>
-          );
-        })}
+        <View style={{ marginTop: spacing.md }}>
+          <Button title="Take Another Section" onPress={reset} />
+        </View>
+      </Card>
+    );
+  }
+
+  // =========================
+  // ROLL CALL SCREEN
+  // =========================
+  return (
+    <Card>
+      <Text style={[typography.subtitle, { marginBottom: spacing.md }]}>
+        {selectedSection.toUpperCase()}
+      </Text>
+
+      {/* student card */}
+      <View
+        style={{
+          padding: spacing.lg,
+          borderRadius: 12,
+          backgroundColor: colors.surface,
+          borderWidth: 1,
+          borderColor: colors.border,
+          marginBottom: spacing.lg,
+        }}
+      >
+        <Text style={{ color: colors.textSecondary }}>
+          {index + 1} / {sortedStudents.length}
+        </Text>
+
+        <Text
+          style={{
+            fontSize: 22,
+            fontWeight: "700",
+            marginTop: 6,
+          }}
+        >
+          {currentStudent.firstName} {currentStudent.lastName}
+        </Text>
       </View>
 
-      {/* BUTTON */}
-      <View style={{ marginTop: spacing.md }}>
-        <Button title="Record Attendance" onPress={recordAttendance} />
+      {/* buttons */}
+      <View style={{ gap: spacing.sm }}>
+        {(["present", "late", "absent"] as AttendanceStatus[]).map((s) => (
+          <Pressable
+            key={s}
+            onPress={() => recordAttendance(s)}
+            style={{
+              padding: spacing.md,
+              borderRadius: 10,
+              alignItems: "center",
+              backgroundColor: colors.primary,
+            }}
+          >
+            <Text
+              style={{
+                color: "white",
+                fontWeight: "600",
+                textTransform: "capitalize",
+              }}
+            >
+              {s}
+            </Text>
+          </Pressable>
+        ))}
       </View>
     </Card>
   );
