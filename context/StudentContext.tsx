@@ -2,6 +2,8 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { Student } from "../types/student";
 import { loadStudents, saveStudents } from "../storage/studentStorage";
 
+import { mockStudents } from "../constants/students";
+
 type StudentContextValue = {
   students: Student[]
   addStudent: (student: Student) => void
@@ -10,7 +12,7 @@ type StudentContextValue = {
 const StudentContext = createContext<StudentContextValue | null>(null);
 
 export function StudentProvider({ children }: { children: React.ReactNode }) {
-  const [students, setStudents] = useState<Student[]>([])
+  const [students, setStudents] = useState<Student[]>(mockStudents)
 
   useEffect(() => {
     setStudents(loadStudents())

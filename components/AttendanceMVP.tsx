@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { View, Text, Pressable } from "react-native";
-import { AttendanceStatus } from "../types/attendance";
+import { AttendanceStatus, AttendanceRecord } from "../types/attendance";
 import { useAttendance } from "../context/AttendanceContext";
 import { useStudents } from "../context/StudentContext";
 
@@ -8,11 +8,22 @@ import Card from "../components/ui/Card";
 import Button from "../components/ui/Button";
 import { colors, spacing, typography } from "../theme";
 
+//temporary data
+import { mockStudents } from "../constants/students";
+import { mockAttendance } from "../constants/mockAttendance";
+
 const today = () => new Date().toISOString().slice(0, 10);
 
 export default function AttendanceMVP() {
   const { records, addRecord, updateRecord } = useAttendance();
   const { students } = useStudents();
+  // const students = mockStudents;
+
+
+  //for testing
+  // const [records, setRecords] = useState<AttendanceRecord | []>([])
+
+
 
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
   const [index, setIndex] = useState(0);
@@ -60,6 +71,28 @@ export default function AttendanceMVP() {
     }
 
     setIndex((prev) => prev + 1);
+
+
+    ////for testing/////
+    // const existing = mockAttendance.find(
+    //   (r) =>
+    //     r.studentId === currentStudent.id &&
+    //     r.date === date
+    // )
+
+    // if (existing) {
+    //   existing.status = status;
+    // } else {
+    //   mockAttendance.push({
+    //     id: crypto.randomUUID(),
+    //     studentId: currentStudent.id,
+    //     date,
+    //     status
+    //   })
+    // }
+
+    // console.log("mockAttendance:", mockAttendance)
+    // setIndex((prev) => prev + 1);
   }
 
   function reset() {
