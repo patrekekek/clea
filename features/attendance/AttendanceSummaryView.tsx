@@ -52,56 +52,56 @@ export default function AttendanceSummaryView({ records }: Props) {
 
 
 
-
-
   return (
     <View style={{ marginTop: spacing.lg, gap: spacing.md }}>
-      
-      {/* TITLE */}
-      <Text style={typography.subtitle}>Attendance Summary</Text>
 
-      {summaries.map((summary) => {
-        const student = students.find(
-          (s) => s.id === summary.studentId
-        );
-
-        const studentFlags = flags.get(summary.studentId);
-
-        return (
-          <Card key={summary.studentId}>
-            
-            {/* NAME */}
-            <Text style={{ fontWeight: "700", fontSize: 16 }}>
-              {student?.firstName || "Unknown Student"}
-            </Text>
-
-            {/* STATS */}
-            <Text style={{ marginTop: 4 }}>
-              Absences: {summary.absences}
-            </Text>
-            <Text>Lates: {summary.lates}</Text>
-
-            {/* FLAGS */}
-            {studentFlags && (
-              <View style={{ marginTop: spacing.sm }}>
-                {studentFlags.map((flag) => (
-                  <Text
-                    key={flag}
-                    style={{
-                      color: colors.danger,
-                      fontWeight: "600",
-                    }}
-                  >
-                    {flag}
-                  </Text>
-                ))}
-              </View>
-            )}
-
-          </Card>
-        );
-      })}
       <CalendarTable />
     </View>
   );
 }
+
+
+
+
+
+      // {summaries.map((summary) => {
+      //   const student = students.find(
+      //     (s) => s.id === summary.studentId
+      //   );
+
+      //   const studentFlags = flags.get(summary.studentId);
+
+      //   return (
+      //     <Card key={summary.studentId}>
+            
+      //       NAME
+      //       <Text style={{ fontWeight: "700", fontSize: 16 }}>
+      //         {student?.firstName || "Unknown Student"}
+      //       </Text>
+
+      //       {/* STATS */}
+      //       <Text style={{ marginTop: 4 }}>
+      //         Absences: {summary.absences}
+      //       </Text>
+      //       <Text>Lates: {summary.lates}</Text>
+
+      //       {/* FLAGS */}
+      //       {studentFlags && (
+      //         <View style={{ marginTop: spacing.sm }}>
+      //           {studentFlags.map((flag) => (
+      //             <Text
+      //               key={flag}
+      //               style={{
+      //                 color: colors.danger,
+      //                 fontWeight: "600",
+      //               }}
+      //             >
+      //               {flag}
+      //             </Text>
+      //           ))}
+      //         </View>
+      //       )}
+
+      //     </Card>
+      //   );
+      // })}
