@@ -1,19 +1,26 @@
 import { View, Text } from "react-native";
-import { AttendanceRecord } from "../../types/attendance";
+import { AttendanceRecord, AttendanceStatus } from "../../types/attendance";
 import { useStudents } from "../../context/StudentContext";
 
+//features
 import {
   buildAttendanceSummary,
   flagAttendance,
+  getMonthDays
 } from "./summary";
+
 
 import Card from "../../components/ui/Card";
 import { colors, spacing, typography } from "../../theme";
+import { useMemo } from "react";
+
+
+import CalendarTable from "../../components/CalendarTable";
 
 type Props = {
   records: AttendanceRecord[];
 };
-
+          
 export default function AttendanceSummaryView({ records }: Props) {
   const { students } = useStudents();
 
@@ -27,6 +34,25 @@ export default function AttendanceSummaryView({ records }: Props) {
       </Text>
     );
   }
+
+
+
+  const attendanceMap = useMemo(() => {
+    const map: Record<string, Record<string, AttendanceStatus>> = {};
+
+    records.forEach(r => {
+      if (!map[r.studentId]) map[r.studentId] = {};
+      map[r.studentId][r.date] = r.status;
+    });
+
+    return map;
+
+  }, [records]);
+
+
+
+
+
 
   return (
     <View style={{ marginTop: spacing.lg, gap: spacing.md }}>
@@ -75,6 +101,7 @@ export default function AttendanceSummaryView({ records }: Props) {
           </Card>
         );
       })}
+      <CalendarTable />
     </View>
   );
 }

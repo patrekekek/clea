@@ -80,3 +80,14 @@ export function flagAttendance(
 
   return flags
 }
+
+export function getMonthDays() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth();
+
+    const days = new Date(year, month + 1, 0).getDate();
+
+    return Array.from({ length: days }, ( _, i) => i + 1);
+
+  }
