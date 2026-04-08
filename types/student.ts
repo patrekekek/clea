@@ -3,5 +3,7 @@ export interface Student {
     firstName: string,
     lastName: string,
     middleName?: string,
-    section: string
+    section: string,
+    sex: string,
+    status: string,
 }   

@@ -35,6 +35,17 @@ export default function CalendarTable() {
     );
   }, [students, selectedSection]);
 
+  // split by sex
+  const maleStudents = useMemo(
+    () => sortedStudents.filter((s) => s.sex === "m"),
+    [sortedStudents]
+  );
+
+  const femaleStudents = useMemo(
+    () => sortedStudents.filter((s) => s.sex === "f"),
+    [sortedStudents]
+  );
+
   // attendance lookup
   const attendanceMap = useMemo(() => {
     const map: Record<string, Record<string, AttendanceStatus>> = {};
@@ -74,7 +85,6 @@ export default function CalendarTable() {
 
   return (
     <View>
-
       {/* DROPDOWN */}
       <View
         style={{
@@ -82,7 +92,7 @@ export default function CalendarTable() {
           borderRadius: 8,
           marginBottom: 10,
           overflow: "hidden",
-          width: 180
+          width: 180,
         }}
       >
         <Picker
@@ -160,8 +170,102 @@ export default function CalendarTable() {
             </View>
           </View>
 
-          {/* ROWS */}
-          {sortedStudents.map((student, i) => (
+          {/* MALE HEADER */}
+          <View style={{ flexDirection: "row", backgroundColor: "#e2e8f0" }}>
+            <Text
+              style={{
+                width: 120,
+                padding: 4,
+                fontWeight: "700",
+                borderWidth: 0.5,
+              }}
+            >
+              MALE ({maleStudents.length})
+            </Text>
+
+            {days.map((day) => (
+              <View
+                key={day}
+                style={{
+                  width: 32,
+                  borderWidth: 0.5,
+                  backgroundColor: "#e2e8f0",
+                }}
+              />
+            ))}
+          </View>
+
+          {/* MALE ROWS */}
+          {maleStudents.map((student, i) => (
+            <View
+              key={student.id}
+              style={{
+                flexDirection: "row",
+                backgroundColor: i % 2 ? "#fafafa" : "white",
+              }}
+            >
+              <Text
+                style={{
+                  width: 120,
+                  padding: 4,
+                  borderWidth: 0.5,
+                }}
+              >
+                {student.firstName}
+              </Text>
+
+              {days.map((day) => {
+                const date = `${year}-${month}-${String(day).padStart(2, "0")}`;
+                const status = attendanceMap[student.id]?.[date];
+
+                return (
+                  <View
+                    key={day}
+                    style={{
+                      width: 32,
+                      height: 32,
+                      justifyContent: "center",
+                      alignItems: "center",
+                      borderWidth: 0.5,
+                      backgroundColor: getColor(status),
+                    }}
+                  >
+                    <Text style={{ fontSize: 10 }}>
+                      {status?.[0]?.toUpperCase() ?? ""}
+                    </Text>
+                  </View>
+                );
+              })}
+            </View>
+          ))}
+
+          {/* FEMALE HEADER */}
+          <View style={{ flexDirection: "row", backgroundColor: "#e2e8f0" }}>
+            <Text
+              style={{
+                width: 120,
+                padding: 4,
+                fontWeight: "700",
+                borderWidth: 0.5,
+              }}
+            >
+              FEMALE ({femaleStudents.length})
+            </Text>
+
+            {days.map((day) => (
+              <View
+                key={day}
+                style={{
+                  width: 32,
+                  borderWidth: 0.5,
+                  backgroundColor: "#e2e8f0",
+                }}
+              />
+            ))}
+          </View>
+
+          {/* FEMALE ROWS */}
+          {femaleStudents.map((student, i) => (
             <View
               key={student.id}
               style={{
