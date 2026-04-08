@@ -8,20 +8,13 @@ import Card from "../components/ui/Card";
 import Button from "../components/ui/Button";
 import { colors, spacing, typography } from "../theme";
 
-//temporary data
-import { mockStudents } from "../constants/students";
-import { mockAttendance } from "../constants/mockAttendance";
 
 const today = () => new Date().toISOString().slice(0, 10);
 
 export default function AttendanceMVP() {
   const { records, addRecord, updateRecord } = useAttendance();
   const { students } = useStudents();
-  // const students = mockStudents;
 
-
-  //for testing
-  // const [records, setRecords] = useState<AttendanceRecord | []>([])
 
 
 
@@ -39,11 +32,18 @@ export default function AttendanceMVP() {
 
     return students
       .filter((s) => s.section === selectedSection)
-      .sort((a, b) =>
-        `${a.lastName} ${a.firstName}`.localeCompare(
+      .sort((a, b) => {
+        // 1. male first
+        if (a.sex !== b.sex) {
+          return a.sex === "m" ? -1 : 1;
+        }
+
+        // 2. then alphabetical
+        return `${a.lastName} ${a.firstName}`.localeCompare(
           `${b.lastName} ${b.firstName}`
-        )
-      );
+        );
+      });
+
   }, [students, selectedSection]);
 
   const currentStudent = sortedStudents[index];

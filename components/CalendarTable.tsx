@@ -211,7 +211,7 @@ export default function CalendarTable() {
                   borderWidth: 0.5,
                 }}
               >
-                {student.firstName}
+                {student.lastName}
               </Text>
 
               {days.map((day) => {
@@ -280,7 +280,7 @@ export default function CalendarTable() {
                   borderWidth: 0.5,
                 }}
               >
-                {student.firstName}
+                {student.lastName}
               </Text>
 
               {days.map((day) => {
