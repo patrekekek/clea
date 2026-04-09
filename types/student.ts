@@ -4,6 +4,6 @@ export interface Student {
     lastName: string,
     middleName?: string,
     section: string,
-    sex: string,
+    sex: "m" | "f",
     status: string,
 }   

@@ -186,29 +186,46 @@ export default function AttendanceMVP() {
       </View>
 
       {/* buttons */}
-      <View style={{ gap: spacing.sm }}>
-        {(["present", "late", "absent"] as AttendanceStatus[]).map((s) => (
-          <Pressable
-            key={s}
-            onPress={() => recordAttendance(s)}
-            style={{
-              padding: spacing.md,
-              borderRadius: 10,
-              alignItems: "center",
-              backgroundColor: colors.primary,
-            }}
-          >
-            <Text
+      <View 
+        style={{ 
+          flexDirection: "row",
+          gap: spacing.sm 
+        }}
+      >
+        {(["present", "late", "absent"] as AttendanceStatus[]).map((s) => {
+          const bg =
+            s === "present"
+              ? "green"
+              : s === "late"
+              ? "orange"
+              : "red";
+
+          return (
+            <Pressable
+              key={s}
+              onPress={() => recordAttendance(s)}
               style={{
-                color: "white",
-                fontWeight: "600",
-                textTransform: "capitalize",
+                flex: 1,
+                padding: spacing.md,
+                borderRadius: 10,
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: bg,
+                height: 70,
               }}
             >
-              {s}
-            </Text>
-          </Pressable>
-        ))}
+              <Text
+                style={{
+                  color: "white",
+                  fontWeight: "900",
+                  textTransform: "capitalize",
+                }}
+              >
+                {s}
+              </Text>
+            </Pressable>
+          );
+        })}
       </View>
     </Card>
   );
