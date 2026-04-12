@@ -23,6 +23,7 @@ import ScoreTable from "../../../features/scores/ScoreTable"
 import AppContainer from "../../../components/AppContainer";
 import AppHeader from "../../../components/AppHeader";
 import TopTabs from "../../../components/TopTabs";
+import ScoreRollCall from "../../../components/scores/ScoreRollCall"
 
 type ScoreKind = "summative" | "performance" | "quarterly"
 
@@ -55,6 +56,7 @@ export default function ScoresPage() {
 
   const rows = buildScoreRows(filteredScores)
 
+  //checking for
   function isDuplicate(newScore: Score) {
     return scores.some(s => {
       if (s.studentId !== newScore.studentId) return false
@@ -69,6 +71,7 @@ export default function ScoresPage() {
     })
   }
 
+  // record the scores
   function recordScore() {
     if (!selectedStudent || !subject || !score ) return;
 
@@ -120,139 +123,9 @@ export default function ScoresPage() {
 
         <Text style={styles.title}>Record Score</Text>
 
-        <View style={styles.card}>
-          {/* Student Dropdown */}
-          <TouchableOpacity
-            onPress={() => setIsOpen(prev => !prev)}
-            style={styles.input}
-          >
-            <Text>
-              {selectedStudent
-                ? getFullName(selectedStudent)
-                : "Select Student"}
-            </Text>
-          </TouchableOpacity>
+      <ScoreRollCall />
 
-          {isOpen && (
-            <View>
-              {students.map(student => (
-                <TouchableOpacity
-                  key={student.id}
-                  onPress={() => {
-                    setSelectedStudent(student.id)
-                    setIsOpen(false)
-                  }}
-                >
-                  <Text>{getFullName(student)}</Text>
-                  <Text>{student.section}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          )}
-
-          {/* Subject */}
-          <TextInput
-            placeholder="Subject"
-            placeholderTextColor={colors.textSecondary}
-            value={subject}
-            onChangeText={setSubject}
-            style={styles.input}
-          />
-
-          {/* Type Selector */}
-          <View style={styles.row}>
-            {(["summative", "performance", "quarterly"] as ScoreKind[]).map(t => (
-              <Pressable
-                key={t}
-                onPress={() => setType(t)}
-                style={[
-                  styles.selectorButton,
-                  type === t && styles.selectorActive,
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.selectorText,
-                    type === t && styles.selectorTextActive,
-                  ]}
-                >
-                  {t}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
-
-          {/* Summative Number */}
-          {type === "summative" && (
-            <View style={styles.row}>
-              {[1, 2, 3, 4].map(n => (
-                <Pressable
-                  key={n}
-                  onPress={() => setSummativeNo(n as SummativeNumber)}
-                  style={[
-                    styles.selectorButton,
-                    summativeNo === n && styles.selectorActive,
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.selectorText,
-                      summativeNo === n && styles.selectorTextActive,
-                    ]}
-                  >
-                    S{n}
-                  </Text>
-                </Pressable>
-              ))}
-            </View>
-          )}
-
-          {/* Score Input */}
-          <TextInput
-            placeholder="Score"
-            placeholderTextColor={colors.textSecondary}
-            keyboardType="numeric"
-            value={score}
-            onChangeText={setScore}
-            style={styles.input}
-          />
-
-          <Pressable style={styles.primaryButton} onPress={recordScore}>
-            <Text style={styles.primaryButtonText}>Record</Text>
-          </Pressable>
-        </View>
-
-        {/* Subject Selector */}
-        <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Select Subject</Text>
-          <View style={styles.rowWrap}>
-            {subjects.map(sub => (
-              <Pressable
-                key={sub}
-                onPress={() => setSelectedSubject(sub)}
-                style={[
-                  styles.selectorButton,
-                  selectedSubject === sub && styles.selectorActive,
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.selectorText,
-                    selectedSubject === sub && styles.selectorTextActive,
-                  ]}
-                >
-                  {sub}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
-        </View>
-
-        {selectedSubject && (
-          <View style={styles.card}>
-            <ScoreTable rows={rows} />
-          </View>
-        )}
+        
     </AppContainer>
   )
 }

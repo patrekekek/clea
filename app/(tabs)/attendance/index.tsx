@@ -2,7 +2,7 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { useAttendance } from "../../../context/AttendanceContext";
 import { useStudents } from "../../../context/StudentContext";
 
-import AttendanceMVP from "../../../components/AttendanceMVP";
+import AttendanceMVP from "../../../components/attendance/AttendanceMVP";
 import AttendanceSummaryView from "../../../features/attendance/AttendanceSummaryView";
 
 

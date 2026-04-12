@@ -15,18 +15,21 @@ type Props = {
     style?: StyleProp<ViewStyle>
 }
 
-export default function Button({ title, onPress, variant = "primary" } : Props) {
+export default function Button({ title, onPress, variant = "primary", style } : Props) {
   const isPrimary = variant === "primary";
 
   return (
     <TouchableOpacity
       onPress={onPress}
-      style={{
+      style={[
+      {
         backgroundColor: isPrimary ? colors.primary : "#f3f4f6",
         padding: spacing.md,
         borderRadius: 10,
         alignItems: "center",
-      }}
+      },
+      style
+    ]}
     >
       <Text
         style={{

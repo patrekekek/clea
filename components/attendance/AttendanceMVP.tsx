@@ -1,12 +1,12 @@
 import { useMemo, useState } from "react";
 import { View, Text, Pressable } from "react-native";
-import { AttendanceStatus, AttendanceRecord } from "../types/attendance";
-import { useAttendance } from "../context/AttendanceContext";
-import { useStudents } from "../context/StudentContext";
+import { AttendanceStatus, AttendanceRecord } from "../../types/attendance";
+import { useAttendance } from "../../context/AttendanceContext";
+import { useStudents } from "../../context/StudentContext";
 
-import Card from "../components/ui/Card";
-import Button from "../components/ui/Button";
-import { colors, spacing, typography } from "../theme";
+import Card from "../ui/Card";
+import Button from "../ui/Button";
+import { colors, spacing, typography } from "../../theme";
 
 
 const today = () => new Date().toISOString().slice(0, 10);
