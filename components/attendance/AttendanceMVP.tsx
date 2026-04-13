@@ -15,9 +15,6 @@ export default function AttendanceMVP() {
   const { records, addRecord, updateRecord } = useAttendance();
   const { students } = useStudents();
 
-
-
-
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
   const [index, setIndex] = useState(0);
 
@@ -48,15 +45,14 @@ export default function AttendanceMVP() {
 
   const currentStudent = sortedStudents[index];
 
+  //recordAttendance
   function recordAttendance(status: AttendanceStatus) {
     if (!currentStudent) return;
 
     const date = today();
 
     const existing = records.find(
-      (r) =>
-        r.studentId === currentStudent.id &&
-        r.date === date
+      (r) => r.studentId === currentStudent.id && r.date  === date
     );
 
     if (existing) {

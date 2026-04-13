@@ -1,5 +1,5 @@
 import { TextInput, StyleSheet, Text, View, Pressable } from 'react-native'
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 
 import Card from '../ui/Card';
 import { colors, spacing, typography } from '../../theme';
@@ -10,14 +10,37 @@ import { Student } from '../../types/student';
 
 type RollCallProps = {
   students: Student[],
-  selectedSection: string,
+  selectedSection: string | null,
   index: number,
   sortedStudents: Student[],
+  value: number,
+  setValue: (v: number) => void
+  onRecord: () => void
 }
 
-export default function RollCallScreen({students, selectedSection, index, sortedStudents} : RollCallProps) {
+export default function RollCallScreen({
+  students,
+  selectedSection,
+  index,
+  sortedStudents,
+  value,
+  setValue,
+  onRecord
+} : RollCallProps) {
   
   const currentStudent = sortedStudents[index];
+
+
+  //for autofocus so that scores can be recorded without point the cursor
+  const inputRef = useRef<TextInput>(null);
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      inputRef.current?.focus();
+    }, 50);
+
+    return () => clearTimeout(t);
+  }, [index]);
   
   
   return (
@@ -39,19 +62,26 @@ export default function RollCallScreen({students, selectedSection, index, sorted
 
       {/* entry */}
       <View style={styles.entryRow}>
-        <TextInput 
+        <TextInput
+          key={index}
+          ref={inputRef}
+          autoFocus
           placeholder="Enter Score"
           keyboardType="numeric"
+          value={value ? String(value) : ""}
+          onChangeText={(t) => setValue(Number(t))}
+          onSubmitEditing={onRecord}
+          returnKeyType='done'
           style={styles.input}
         />
 
-        <Pressable style={styles.recordButton}>
+        <Pressable 
+          style={styles.recordButton}
+          onPress={onRecord}
+        >
           <Text style={styles.recordText}>Record</Text>
         </Pressable>
-
-
       </View>
-
     </Card>
   )
 

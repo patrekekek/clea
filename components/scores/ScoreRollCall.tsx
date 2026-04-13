@@ -8,24 +8,25 @@ import RollCallScreen from './RollCallScreen';
 //context
 import { useStudents } from '../../context/StudentContext';
 
-import { colors, spacing } from "../../theme"
+import { colors, spacing, typography } from "../../theme"
 import Button from '../ui/Button';
-
-
+import { useScores } from '../../context/ScoresContext';
 
 
 export default function ScoreRollCall() {
   const { students } = useStudents();
-  const [selectedSection, setSelectedSection] = useState<string>("");
+  const { scores, addScore, updateScore, deleteScore } = useScores();
+  const [selectedSection, setSelectedSection] = useState<string | null>(null);
   const [selectedTest, setSelectedTest] = useState<string>("");
   const [isRecording, setIsRecording] = useState<boolean>(false);
+  const [value, setValue] = useState<number>(0)
   const [index, setIndex] = useState(0);
 
   const tests = ["Summative 1", "Summative 2", "Summative 3", "Summative 4", "Performance", "Quarterly"]
 
-
+  console.log("scores", scores);
   console.log(selectedSection, selectedTest);
-  console.log("isRecording", isRecording);
+  
 
   // filter students by section
   const sortedStudents = useMemo(() => {
@@ -47,10 +48,9 @@ export default function ScoreRollCall() {
 
   }, [students, selectedSection]);
 
-  console.log("sortedStudents", sortedStudents)
 
 
-
+  // recording check
   const startRecording = () => {
     if(!selectedSection || !selectedTest) {
       window.alert("Please complete all details");
@@ -64,6 +64,92 @@ export default function ScoreRollCall() {
   const sections = useMemo(() => {
     return [...new Set(students.map((s) => s.section))]
   }, [students]);
+
+
+  // recording scores
+  const currentStudent = sortedStudents[index];
+
+  function recordScore() {
+    if (!currentStudent) return;
+
+    const isSummative = selectedTest.startsWith("Summative");
+    const summativeNo = isSummative
+      ? (Number(selectedTest.split(" ")[1]) as 1 | 2 | 3 | 4)
+      : null;
+    
+    const existing = scores.find((s) => {
+      if (s.studentId !== currentStudent.id) return false;
+
+      if (isSummative && s.type === "summative") {
+        return s.summativeNo === summativeNo;
+      }
+
+      if (selectedTest === "Performance" && s.type === "performance") {
+        return true;
+      }
+
+      if (selectedTest === "Quarterly" && s.type === "quarterly") {
+        return true;
+      }
+
+      return false;
+    })
+
+    //update score
+    if (existing) {
+      updateScore({
+        ...existing,
+        score: value
+      })
+    }
+
+    // create new score
+    if (isSummative && summativeNo) { //if it is summative
+      addScore({
+        id: crypto.randomUUID(), //replace with student id on database
+        studentId: currentStudent.id,
+        subject: "Math", //replace with teacher subject on context
+        type: "summative",
+        summativeNo,
+        score: value,
+      });
+    }
+
+    if (selectedTest === "Performance") {
+      addScore({
+        id: crypto.randomUUID(),
+        studentId: currentStudent.id,
+        subject: "Math",
+        type: "performance",
+        score: value, 
+      });
+    }
+    
+    if (selectedTest === "Quarterly") {
+      addScore({
+        id: crypto.randomUUID(),
+        studentId: currentStudent.id,
+        subject: "Math",
+        type: "quarterly",
+        score: value, 
+      });
+    }
+
+    setValue(0);
+    setIndex(prev => prev + 1);
+
+  }
+
+  function reset() {
+    setIndex(0);
+    setSelectedSection(null);
+    setSelectedTest("");
+    setIsRecording(false);
+    setValue(0);
+  }
+
+
+
 
   if (isRecording === false) {
     return (
@@ -136,6 +222,27 @@ export default function ScoreRollCall() {
   }
 
   // =========================
+  // DONE SCREEN
+  // =========================
+
+  if (!currentStudent) {
+    return (
+      <Card>
+        <Text style={typography.subtitle}>
+          Attendance Complete ✅
+        </Text>
+
+        <View style={{ marginTop: spacing.md }}>
+          <Button 
+            title="Take Another Section" 
+            onPress={reset}
+          />
+        </View>
+      </Card>
+    )
+  }
+
+  // =========================
   // ROLL CALL SCREEN
   // =========================
 
@@ -146,9 +253,14 @@ export default function ScoreRollCall() {
         selectedSection={selectedSection}
         index={index}
         sortedStudents={sortedStudents}
+        value={value}
+        setValue={setValue}
+        onRecord={recordScore}
       />
     )
   }
+
+
 
 
 
