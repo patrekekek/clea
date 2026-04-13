@@ -11,9 +11,10 @@ import { useStudents } from '../../context/StudentContext';
 import { colors, spacing, typography } from "../../theme"
 import Button from '../ui/Button';
 import { useScores } from '../../context/ScoresContext';
+import ScoreSummaryView from '../../features/scores/ScoreSummaryView';
 
 
-export default function ScoreRollCall() {
+export default function ScoreMVP() {
   const { students } = useStudents();
   const { scores, addScore, updateScore, deleteScore } = useScores();
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
@@ -217,6 +218,8 @@ export default function ScoreRollCall() {
             />
         </View>
 
+        <ScoreSummaryView />
+
       </Card>
     )
   }
@@ -259,7 +262,6 @@ export default function ScoreRollCall() {
       />
     )
   }
-
 
 
 

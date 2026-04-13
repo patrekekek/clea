@@ -16,14 +16,14 @@ import { Student } from "../../../types/student"
 
 import { colors } from "../../../theme/colors"
 import { buildScoreRows } from "../../../features/scores/selectors"
-import ScoreTable from "../../../features/scores/ScoreTable"
+import ScoreTable from "../../../features/scores/ScoreSummaryView"
 
 
 //components
 import AppContainer from "../../../components/AppContainer";
 import AppHeader from "../../../components/AppHeader";
 import TopTabs from "../../../components/TopTabs";
-import ScoreRollCall from "../../../components/scores/ScoreRollCall"
+import ScoreMVP from "../../../components/scores/ScoreMVP"
 
 type ScoreKind = "summative" | "performance" | "quarterly"
 
@@ -123,7 +123,7 @@ export default function ScoresPage() {
 
         <Text style={styles.title}>Record Score</Text>
 
-      <ScoreRollCall />
+      <ScoreMVP />
 
         
     </AppContainer>
