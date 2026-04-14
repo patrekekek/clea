@@ -50,71 +50,12 @@ export default function ScoresPage() {
     "MAPEH",
   ]
 
-  const filteredScores = selectedSubject
-    ? scores.filter(s => s.subject === selectedSubject)
-    : []
+ 
 
-  const rows = buildScoreRows(filteredScores)
 
-  //checking for
-  function isDuplicate(newScore: Score) {
-    return scores.some(s => {
-      if (s.studentId !== newScore.studentId) return false
-      if (s.subject !== newScore.subject) return false
-      if (s.type !== newScore.type) return false
 
-      if (s.type === "summative" && newScore.type === "summative") {
-        return s.summativeNo === newScore.summativeNo
-      }
 
-      return true
-    })
-  }
 
-  // record the scores
-  function recordScore() {
-    if (!selectedStudent || !subject || !score ) return;
-
-    let newScore: Score;
-
-    if (type === "summative") {
-      newScore = {
-        id: crypto.randomUUID(),
-        studentId: selectedStudent, //need to change to name here
-        subject,
-        type: "summative",
-        summativeNo,
-        score: Number(score)
-      }
-    } else {
-      newScore = {
-        id: crypto.randomUUID(),
-        studentId: selectedStudent,
-        subject,
-        type,
-        score: Number(score)
-      }
-    }
-
-    if (isDuplicate(newScore)) {
-      alert("Duplicate score detected");
-      return;
-    }
-
-    addScore(newScore);
-    setScore("");
-    setSummativeNo(1)
-
-  }
-
-  function getFullName(student: Student | string) {
-    if (typeof student === "string") {
-      const found = students.find(s => s.id === student)
-      if (!found) return ""
-      return `${found.firstName} ${found.lastName}`
-    }
-    return `${student.firstName} ${student.lastName}`
-  }
 
   return (
     <AppContainer>
