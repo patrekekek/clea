@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
-import { View, Text, Pressable } from "react-native";
-import { AttendanceStatus, AttendanceRecord } from "../../types/attendance";
+import { View, Text, Pressable, StyleSheet } from "react-native";
+import { AttendanceStatus } from "../../types/attendance";
 import { useAttendance } from "../../context/AttendanceContext";
 import { useStudents } from "../../context/StudentContext";
 
@@ -8,8 +8,8 @@ import Card from "../ui/Card";
 import Button from "../ui/Button";
 import { colors, spacing, typography } from "../../theme";
 
-
 const today = () => new Date().toISOString().slice(0, 10);
+
 
 export default function AttendanceMVP() {
   const { records, addRecord, updateRecord } = useAttendance();
@@ -67,34 +67,17 @@ export default function AttendanceMVP() {
     }
 
     setIndex((prev) => prev + 1);
-
-
-    ////for testing/////
-    // const existing = mockAttendance.find(
-    //   (r) =>
-    //     r.studentId === currentStudent.id &&
-    //     r.date === date
-    // )
-
-    // if (existing) {
-    //   existing.status = status;
-    // } else {
-    //   mockAttendance.push({
-    //     id: crypto.randomUUID(),
-    //     studentId: currentStudent.id,
-    //     date,
-    //     status
-    //   })
-    // }
-
-    // console.log("mockAttendance:", mockAttendance)
-    // setIndex((prev) => prev + 1);
   }
 
+  //reset
   function reset() {
     setIndex(0);
     setSelectedSection(null);
   }
+
+
+
+
 
   // =========================
   // SECTION SELECT SCREEN
@@ -102,7 +85,7 @@ export default function AttendanceMVP() {
   if (!selectedSection) {
     return (
       <Card>
-        <Text style={[typography.subtitle, { marginBottom: spacing.md }]}>
+        <Text style={[typography.subtitle, styles.header]}>
           Select Section
         </Text>
 
@@ -111,15 +94,9 @@ export default function AttendanceMVP() {
             <Pressable
               key={section}
               onPress={() => setSelectedSection(section)}
-              style={{
-                padding: spacing.md,
-                borderRadius: 10,
-                borderWidth: 1,
-                borderColor: colors.border,
-                backgroundColor: colors.surface,
-              }}
+              style={styles.option}
             >
-              <Text style={{ fontWeight: "600" }}>
+              <Text style={styles.optionText}>
                 {section.toUpperCase()}
               </Text>
             </Pressable>
@@ -139,7 +116,7 @@ export default function AttendanceMVP() {
           Attendance Complete ✅
         </Text>
 
-        <View style={{ marginTop: spacing.md }}>
+        <View style={styles.header}>
           <Button title="Take Another Section" onPress={reset} />
         </View>
       </Card>
@@ -151,31 +128,20 @@ export default function AttendanceMVP() {
   // =========================
   return (
     <Card>
-      <Text style={[typography.subtitle, { marginBottom: spacing.md }]}>
+      <Text style={[typography.subtitle, styles.header]}>
         {selectedSection.toUpperCase()}
       </Text>
 
       {/* student card */}
       <View
-        style={{
-          padding: spacing.lg,
-          borderRadius: 12,
-          backgroundColor: colors.surface,
-          borderWidth: 1,
-          borderColor: colors.border,
-          marginBottom: spacing.lg,
-        }}
+        style={styles.studentCard}
       >
         <Text style={{ color: colors.textSecondary }}>
           {index + 1} / {sortedStudents.length}
         </Text>
 
         <Text
-          style={{
-            fontSize: 22,
-            fontWeight: "700",
-            marginTop: 6,
-          }}
+          style={styles.studentCardText}
         >
           {currentStudent.firstName} {currentStudent.lastName}
         </Text>
@@ -183,10 +149,7 @@ export default function AttendanceMVP() {
 
       {/* buttons */}
       <View 
-        style={{ 
-          flexDirection: "row",
-          gap: spacing.sm 
-        }}
+        style={styles.buttonContainer}
       >
         {(["present", "late", "absent"] as AttendanceStatus[]).map((s) => {
           const bg =
@@ -200,22 +163,10 @@ export default function AttendanceMVP() {
             <Pressable
               key={s}
               onPress={() => recordAttendance(s)}
-              style={{
-                flex: 1,
-                padding: spacing.md,
-                borderRadius: 10,
-                alignItems: "center",
-                justifyContent: "center",
-                backgroundColor: bg,
-                height: 70,
-              }}
+              style={[{backgroundColor: bg,}, styles.attendanceButton]}
             >
               <Text
-                style={{
-                  color: "white",
-                  fontWeight: "900",
-                  textTransform: "capitalize",
-                }}
+                style={styles.attendanceText}
               >
                 {s}
               </Text>
@@ -226,3 +177,57 @@ export default function AttendanceMVP() {
     </Card>
   );
 }
+
+const styles = StyleSheet.create({
+  header: { 
+    marginBottom: spacing.md 
+  },
+
+  option: {
+    padding: spacing.md,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+  },
+
+  optionText: {
+    fontWeight: "600"
+  },
+
+  studentCard: {
+    padding: spacing.lg,
+    borderRadius: 12,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    marginBottom: spacing.lg,
+  },
+
+  studentCardText: {
+    fontSize: 22,
+    fontWeight: "700",
+    marginTop: 6,
+  },
+
+  buttonContainer: { 
+    flexDirection: "row",
+    gap: spacing.sm 
+  },
+
+  attendanceButton: {
+    flex: 1,
+    padding: spacing.md,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    height: 70,
+  },
+  
+  attendanceText: {
+    color: "white",
+    fontWeight: "900",
+    textTransform: "capitalize",
+  },
+  
+})

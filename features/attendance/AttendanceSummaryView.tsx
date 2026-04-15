@@ -1,5 +1,4 @@
 import { View, Text } from "react-native";
-import { AttendanceRecord, AttendanceStatus } from "../../types/attendance";
 
 //features
 import {
@@ -9,14 +8,11 @@ import {
 import { colors, spacing, typography } from "../../theme";
 
 import CalendarTable from "../../components/CalendarTable";
+import { useAttendance } from "../../context/AttendanceContext";
 
-type Props = {
-  records: AttendanceRecord[];
-};
           
-export default function AttendanceSummaryView({ records }: Props) {
-
-
+export default function AttendanceSummaryView() {
+  const { records } = useAttendance();
   const summaries = buildAttendanceSummary(records);
 
   if (summaries.length === 0) {

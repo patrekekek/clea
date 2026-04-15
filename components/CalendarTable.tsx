@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { ScrollView, View, Text } from "react-native";
+import { ScrollView, View, Text, StyleSheet } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 
 import { useStudents } from "../context/StudentContext";
@@ -16,12 +16,10 @@ export default function CalendarTable() {
 
   const days = getMonthDays();
 
-  // unique sections
   const sections = useMemo(() => {
     return ["all", ...new Set(students.map((s) => s.section))];
   }, [students]);
 
-  // filter + sort
   const sortedStudents = useMemo(() => {
     const filtered =
       selectedSection === "all"
@@ -35,7 +33,6 @@ export default function CalendarTable() {
     );
   }, [students, selectedSection]);
 
-  // split by sex
   const maleStudents = useMemo(
     () => sortedStudents.filter((s) => s.sex === "m"),
     [sortedStudents]
@@ -46,7 +43,6 @@ export default function CalendarTable() {
     [sortedStudents]
   );
 
-  // attendance lookup
   const attendanceMap = useMemo(() => {
     const map: Record<string, Record<string, AttendanceStatus>> = {};
 
@@ -86,15 +82,7 @@ export default function CalendarTable() {
   return (
     <View>
       {/* DROPDOWN */}
-      <View
-        style={{
-          borderWidth: 1,
-          borderRadius: 8,
-          marginBottom: 10,
-          overflow: "hidden",
-          width: 180,
-        }}
-      >
+      <View style={styles.dropdown}>
         <Picker
           selectedValue={selectedSection}
           onValueChange={(value) => setSelectedSection(value)}
@@ -113,106 +101,41 @@ export default function CalendarTable() {
         <View>
           {/* HEADER */}
           <View>
-            {/* DATE ROW */}
-            <View style={{ flexDirection: "row" }}>
-              <Text
-                style={{
-                  width: 120,
-                  fontWeight: "700",
-                  backgroundColor: "#f1f5f9",
-                  padding: 6,
-                  borderWidth: 0.5,
-                }}
-              >
-                Name
-              </Text>
-
+            <View style={styles.row}>
+              <Text style={styles.nameHeader}>Name</Text>
               {days.map((day) => (
-                <Text
-                  key={day}
-                  style={{
-                    width: 32,
-                    textAlign: "center",
-                    fontWeight: "700",
-                    backgroundColor: "#f1f5f9",
-                    borderWidth: 0.5,
-                  }}
-                >
+                <Text key={day} style={styles.dayHeader}>
                   {day}
                 </Text>
               ))}
             </View>
 
-            {/* WEEKDAY ROW */}
-            <View style={{ flexDirection: "row" }}>
-              <Text
-                style={{
-                  width: 120,
-                  backgroundColor: "#f8fafc",
-                  borderWidth: 0.5,
-                }}
-              />
-
+            <View style={styles.row}>
+              <Text style={styles.emptyHeader} />
               {days.map((day) => (
-                <Text
-                  key={day}
-                  style={{
-                    width: 32,
-                    textAlign: "center",
-                    fontSize: 10,
-                    backgroundColor: "#f8fafc",
-                    borderWidth: 0.5,
-                  }}
-                >
+                <Text key={day} style={styles.weekday}>
                   {getWeekday(day)}
                 </Text>
               ))}
             </View>
           </View>
 
-          {/* MALE HEADER */}
-          <View style={{ flexDirection: "row", backgroundColor: "#e2e8f0" }}>
-            <Text
-              style={{
-                width: 120,
-                padding: 4,
-                fontWeight: "700",
-                borderWidth: 0.5,
-              }}
-            >
+          {/* MALE */}
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionText}>
               MALE ({maleStudents.length})
             </Text>
-
             {days.map((day) => (
-              <View
-                key={day}
-                style={{
-                  width: 32,
-                  borderWidth: 0.5,
-                  backgroundColor: "#e2e8f0",
-                }}
-              />
+              <View key={day} style={styles.sectionCell} />
             ))}
           </View>
 
-          {/* MALE ROWS */}
           {maleStudents.map((student, i) => (
             <View
               key={student.id}
-              style={{
-                flexDirection: "row",
-                backgroundColor: i % 2 ? "#fafafa" : "white",
-              }}
+              style={[styles.row, i % 2 ? styles.altRow : styles.whiteRow]}
             >
-              <Text
-                style={{
-                  width: 120,
-                  padding: 4,
-                  borderWidth: 0.5,
-                }}
-              >
-                {student.lastName}
-              </Text>
+              <Text style={styles.nameCell}>{student.lastName}</Text>
 
               {days.map((day) => {
                 const date = `${year}-${month}-${String(day).padStart(2, "0")}`;
@@ -221,16 +144,12 @@ export default function CalendarTable() {
                 return (
                   <View
                     key={day}
-                    style={{
-                      width: 32,
-                      height: 32,
-                      justifyContent: "center",
-                      alignItems: "center",
-                      borderWidth: 0.5,
-                      backgroundColor: getColor(status),
-                    }}
+                    style={[
+                      styles.cell,
+                      { backgroundColor: getColor(status) },
+                    ]}
                   >
-                    <Text style={{ fontSize: 10 }}>
+                    <Text style={styles.cellText}>
                       {status?.[0]?.toUpperCase() ?? ""}
                     </Text>
                   </View>
@@ -239,49 +158,22 @@ export default function CalendarTable() {
             </View>
           ))}
 
-          {/* FEMALE HEADER */}
-          <View style={{ flexDirection: "row", backgroundColor: "#e2e8f0" }}>
-            <Text
-              style={{
-                width: 120,
-                padding: 4,
-                fontWeight: "700",
-                borderWidth: 0.5,
-              }}
-            >
+          {/* FEMALE */}
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionText}>
               FEMALE ({femaleStudents.length})
             </Text>
-
             {days.map((day) => (
-              <View
-                key={day}
-                style={{
-                  width: 32,
-                  borderWidth: 0.5,
-                  backgroundColor: "#e2e8f0",
-                }}
-              />
+              <View key={day} style={styles.sectionCell} />
             ))}
           </View>
 
-          {/* FEMALE ROWS */}
           {femaleStudents.map((student, i) => (
             <View
               key={student.id}
-              style={{
-                flexDirection: "row",
-                backgroundColor: i % 2 ? "#fafafa" : "white",
-              }}
+              style={[styles.row, i % 2 ? styles.altRow : styles.whiteRow]}
             >
-              <Text
-                style={{
-                  width: 120,
-                  padding: 4,
-                  borderWidth: 0.5,
-                }}
-              >
-                {student.lastName}
-              </Text>
+              <Text style={styles.nameCell}>{student.lastName}</Text>
 
               {days.map((day) => {
                 const date = `${year}-${month}-${String(day).padStart(2, "0")}`;
@@ -290,16 +182,12 @@ export default function CalendarTable() {
                 return (
                   <View
                     key={day}
-                    style={{
-                      width: 32,
-                      height: 32,
-                      justifyContent: "center",
-                      alignItems: "center",
-                      borderWidth: 0.5,
-                      backgroundColor: getColor(status),
-                    }}
+                    style={[
+                      styles.cell,
+                      { backgroundColor: getColor(status) },
+                    ]}
                   >
-                    <Text style={{ fontSize: 10 }}>
+                    <Text style={styles.cellText}>
                       {status?.[0]?.toUpperCase() ?? ""}
                     </Text>
                   </View>
@@ -312,3 +200,91 @@ export default function CalendarTable() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  dropdown: {
+    borderWidth: 1,
+    borderRadius: 8,
+    marginBottom: 10,
+    overflow: "hidden",
+    width: 180,
+  },
+
+  row: {
+    flexDirection: "row",
+  },
+
+  nameHeader: {
+    width: 120,
+    fontWeight: "700",
+    backgroundColor: "#f1f5f9",
+    padding: 6,
+    borderWidth: 0.5,
+  },
+
+  dayHeader: {
+    width: 32,
+    textAlign: "center",
+    fontWeight: "700",
+    backgroundColor: "#f1f5f9",
+    borderWidth: 0.5,
+  },
+
+  emptyHeader: {
+    width: 120,
+    backgroundColor: "#f8fafc",
+    borderWidth: 0.5,
+  },
+
+  weekday: {
+    width: 32,
+    textAlign: "center",
+    fontSize: 10,
+    backgroundColor: "#f8fafc",
+    borderWidth: 0.5,
+  },
+
+  sectionHeader: {
+    flexDirection: "row",
+    backgroundColor: "#e2e8f0",
+  },
+
+  sectionText: {
+    width: 120,
+    padding: 4,
+    fontWeight: "700",
+    borderWidth: 0.5,
+  },
+
+  sectionCell: {
+    width: 32,
+    borderWidth: 0.5,
+    backgroundColor: "#e2e8f0",
+  },
+
+  nameCell: {
+    width: 120,
+    padding: 4,
+    borderWidth: 0.5,
+  },
+
+  cell: {
+    width: 32,
+    height: 32,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 0.5,
+  },
+
+  cellText: {
+    fontSize: 10,
+  },
+
+  altRow: {
+    backgroundColor: "#fafafa",
+  },
+
+  whiteRow: {
+    backgroundColor: "white",
+  },
+});
