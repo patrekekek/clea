@@ -6,4 +6,5 @@ export interface Student {
     section: string,
     sex: "m" | "f",
     status: string,
+    pending?: boolean
 }   
