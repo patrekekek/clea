@@ -25,79 +25,31 @@ import TopTabs from "../../../components/TopTabs";
 import { colors } from "../../../theme/colors";
 
 export default function SectionsPage() {
-  const [sections, setSections] = useState<Section[]>([]);
+
   const [newName, setNewName] = useState("");
+  const [selectedSection, setSelectedSection] = useState<String>("");
   const router = useRouter();
 
   const { students } = useStudents();
 
-  // LOAD
-  useEffect(() => {
-    init();
-  }, []);
+  
 
-  async function init() {
-    const stored = await loadSections();
 
-    if (stored.length > 0) {
-      setSections(stored);
-    } else {
-      const defaults: Section[] = [
-        { id: crypto.randomUUID(), name: "Section A" },
-        { id: crypto.randomUUID(), name: "Section B" },
-        { id: crypto.randomUUID(), name: "Section C" },
-        { id: crypto.randomUUID(), name: "Section D" },
-        { id: crypto.randomUUID(), name: "Section E" },
-      ];
+  const sections: Section[] = [
+    { id: crypto.randomUUID(), name: "Apple" },
+    { id: crypto.randomUUID(), name: "Banana" },
+    { id: crypto.randomUUID(), name: "Cat" },
+    { id: crypto.randomUUID(), name: "Dog" },
+    { id: crypto.randomUUID(), name: "Eagle" },
+  ] 
 
-      setSections(defaults);
-      await saveSections(defaults);
-    }
+
+  const selectedStudent = (selectedSection: String) => {
+    return students
+      .filter(s => s.section === selectedSection)
   }
 
-  async function persist(updated: Section[]) {
-    setSections(updated);
-    await saveSections(updated);
-  }
 
-  function addSection() {
-    if (!newName.trim()) return;
-
-    const updated = [
-      ...sections,
-      { id: crypto.randomUUID(), name: newName },
-    ];
-
-    persist(updated);
-    setNewName("");
-  }
-
-  function updateSection(id: string, name: string) {
-    const updated = sections.map(s =>
-      s.id === id ? { ...s, name } : s
-    );
-    persist(updated);
-  }
-
-  function goToSection(id: string) {
-    router.push(`/sections/${id}`);
-  }
-
-  // ✅ MEMOIZED grouping + sorting
-  const sortedSections = useMemo(() => {
-    return sections
-      .map(section => {
-        const sectionStudents = students
-          .filter(s => s.section === section.name) // ⚠️ still name-based
-          .sort((a, b) => a.lastName.localeCompare(b.lastName));
-
-        return {
-          ...section,
-          students: sectionStudents,
-        };
-      })
-      .sort((a, b) => a.name.localeCompare(b.name));
-  }, [sections, students]);
 
   return (
     <AppContainer>
@@ -115,23 +67,56 @@ export default function SectionsPage() {
           style={styles.input}
         />
 
-        <Pressable style={styles.addBtn} onPress={addSection}>
+        <Pressable style={styles.addBtn} onPress={() => {}}>
           <Text style={{ color: "white", fontSize: 18 }}>+</Text>
         </Pressable>
       </View>
 
       {/* Sections List */}
       <FlatList
-        data={sections.sort((a, b) => a.name.localeCompare(b.name))}
+        data={sections}
         keyExtractor={item => item.id}
-        renderItem={({ item }) => (
-          <Pressable
-            style={styles.card}
-            onPress={() => goToSection(item.id)}
-          >
-            <Text style={styles.name}>{item.name}</Text>
-          </Pressable>
-        )}
+        renderItem={({ item }) => {
+          const isSelected = selectedSection === item.name;
+          const sectionStudents = students.filter(
+            s => s.section === item.name
+          )
+
+          return (
+            <View style={{ marginBottom: 12 }}>
+              {/*section*/}
+              <Pressable
+                style={styles.card}
+                onPress={() =>
+                  setSelectedSection(isSelected ? "" : item.name)
+                }
+              >
+                <Text style={styles.name}>{item.name}</Text>
+              </Pressable>
+
+              {/* Students (only show if selected) */}
+                {isSelected && (
+                  <View style={{ marginLeft: 10 }}>
+                    {sectionStudents.length === 0 ? (
+                      <Text style={{ color: "gray" }}>
+                        No students
+                      </Text>
+                    ) : (
+                      sectionStudents.map(student => (
+                        <View key={student.id} style={styles.studentCard}>
+                          <Text>
+                            {student.lastName}, {student.firstName}
+                          </Text>
+                        </View>
+                      ))
+                    )}
+                  </View>
+                )}
+
+
+            </View>
+          )
+        }}
       />
     </AppContainer>
   );
@@ -180,5 +165,11 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "orange",
     marginTop: 4,
+  },
+  studentCard: {
+    backgroundColor: "#f2f2f2",
+    padding: 10,
+    borderRadius: 8,
+    marginBottom: 6,
   },
 });
