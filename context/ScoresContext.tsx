@@ -135,12 +135,9 @@ export function ScoresProvider({ children }: { children: React.ReactNode }) {
             )
           )
         } catch(error) {
-          console.error("Failed to fetch")
+          console.error("Failed to update")
         }
       })
-
-
-
 
   }, [])
 
