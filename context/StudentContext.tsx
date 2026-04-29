@@ -10,7 +10,7 @@ type StudentContextValue = {
 
 //
 
-type StudentSupabase = {
+type StudentsSupabase = {
   id: string;
   first_name: string;
   last_name: string;
@@ -37,7 +37,7 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
   const fetchStudents = async (local: Student[]) => {
     try {
       const res = await fetch(API);
-      const data: StudentSupabase[] = await res.json();
+      const data: StudentsSupabase[] = await res.json();
 
       //format to match frontend
       const formatted: Student[] = data.map((s) => ({

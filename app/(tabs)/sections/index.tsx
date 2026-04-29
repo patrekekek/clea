@@ -36,15 +36,15 @@ export default function SectionsPage() {
 
 
   const sections: Section[] = [
-    { id: crypto.randomUUID(), name: "Apple" },
-    { id: crypto.randomUUID(), name: "Banana" },
-    { id: crypto.randomUUID(), name: "Cat" },
-    { id: crypto.randomUUID(), name: "Dog" },
-    { id: crypto.randomUUID(), name: "Eagle" },
+    { id: "apple", name: "Apple" },
+    { id: "banana", name: "Banana" },
+    { id: "cat", name: "Cat" },
+    { id: "dog", name: "Dog" },
+    { id: "eagle", name: "Eagle" },
   ] 
 
 
-  const selectedStudent = (selectedSection: String) => {
+  const selectedStudents = (selectedSection: String) => {
     return students
       .filter(s => s.section === selectedSection)
   }
