@@ -51,12 +51,6 @@ export default function ScoresPage() {
   ]
 
  
-
-
-
-
-
-
   return (
     <AppContainer>
       <AppHeader />

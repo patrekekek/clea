@@ -22,6 +22,15 @@ type ScoreWithPending = Score & {
   pending?: boolean
 }
 
+type Action = 
+| { type: "SET_LOCAL", payload: ScoreWithPending[] }
+| { type: "MERGE_REMOTE", payload: Score[] }
+| { type: "ADD", payload: Score }
+| { type: "UPDATE", payload: Score }
+| { type: "DELETE", payload: string }
+| { type: "SYNC_SUCESS", payload: string }
+
+
 type PendingAction = 
 | { type: "ADD", score: Score}
 
@@ -29,6 +38,15 @@ const API = "http://localhost:5000/api/scores/"
 
 
 const ScoresContext = createContext<ScoresContextValue | null>(null);
+
+
+//REDUCER
+// function scoresReducer(
+//   state: ScoreWithPending[],
+//   action: Action
+// ): ScoreWithPending[] {
+
+// }
 
 
 export function ScoresProvider({ children }: { children: React.ReactNode }) {
