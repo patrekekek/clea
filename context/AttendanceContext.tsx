@@ -17,16 +17,52 @@ type AttendanceSupabase = {
 }
 
 type AttendanceRecordWithPending = AttendanceRecord & {
-  pending?: boolean
+  pendingAction: "ADD" | "UPDATE" | "DELETE"
 }
 
-type PendingAction = 
-| { type: "ADD", attendance: AttendanceRecord}
+type Action =
+| { type: "SET_LOCAL", payload: AttendanceRecordWithPending[] }
+| { type: "MERGE_REMOTE", payload: AttendanceRecord[] }
+| { type: "ADD", payload: AttendanceRecord }
+| { type: "UPDATE", payload: AttendanceRecord }
+| { type: "DELETE", payload: string }
+| { type: "SYNC_SUCCESS", payload: string }
+
+
 
 const API = "http://localhost:5000/api/attendance/"
 
 
+
 const AttendanceContext = createContext<AttendanceContextValue | null>(null);
+
+
+//REDUCER
+const attendanceReducer = (
+  state: AttendanceRecordWithPending[],
+  action: Action
+): AttendanceRecordWithPending[] => {
+  switch (action.type) {
+
+    case "SET_LOCAL":
+      return action.payload
+
+    case "MERGE_REMOTE": {
+      const map = new Map(state.map(s => [s.id, s]));
+
+      action.payload.forEach(s => {
+        const local = map.get(s.id);
+
+        
+      })
+
+    }
+  }
+
+  return []
+}
+
+
 
 
 export function AttendanceProvider({ children }: { children: React.ReactNode }) {

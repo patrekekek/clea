@@ -1,25 +1,17 @@
-import { createContext, useContext, useEffect, useReducer, useState } from "react"
+import { createContext, useEffect, useReducer, useState } from "react"
 import { Score } from "../types/score"
 import { loadScores, saveScores } from "../storage/scoresStorage"
 
-type ScoresContextValue = {
-  scores: ScoreWithPending[]
-  addScore: (score: Score) => void
-  updateScore: (score: Score) => void
-  deleteScore: (id: string) => void
-}
 
-type ScoresSupabase = {
-  id: string,
-  student_id: string,
-  subject: string,
-  type:  "summative" | "performance" | "quarterly",
-  summative_no?: number,
-  score: number,
+type ScoresContextValue = {
+  scores: ScoreWithPending[],
+  addScore: (score: Score) => void,
+  updateScore: (score: Score) => void,
+  deleteScore: (id: string) => void,
 }
 
 type ScoreWithPending = Score & {
-  pending?: boolean
+  pendingAction?: "ADD" | "UPDATE" | "DELETE"
 }
 
 type Action = 
@@ -31,8 +23,6 @@ type Action =
 | { type: "SYNC_SUCCESS", payload: string }
 
 
-type PendingAction = 
-| { type: "ADD", score: Score}
 
 const API = "http://localhost:5000/api/scores/"
 
@@ -54,36 +44,65 @@ const scoresReducer = (
       const map = new Map(state.map(s => [s.id, s]));
 
       action.payload.forEach(s => {
-        if (!map.has(s.id)) {
-          map.set(s.id, s)
+        const local = map.get(s.id);
+
+        if (!local) {
+          map.set(s.id, s);
+        } else if (local.pendingAction === "DELETE") {
+          // prevent deleted to appear again
+          return;
         }
       });
 
       return Array.from(map.values());
-    };
+    }
 
     case "ADD":
-      return [...state, {...action.payload, pending: true}];
+      return [...state, {...action.payload, pendingAction: "ADD"}];
 
     
     case "UPDATE":
-      return state.map(s =>
-        s.id === action.payload.id
-          ? { ...action.payload, pending: true }
-          : s
-      );
+      return state.map(s => {
+          if (s.id !== action.payload.id) return s;
+
+          if (s.pendingAction === "DELETE") return s; // don't revive deleted item
+
+          return { ...action.payload, pendingAction: "UPDATE" };
+        });
     
     case "DELETE":
-      return state.filter(s => s.id !== action.payload);
+      return state.map(s => 
+        s.id === action.payload
+          ? { ...s, pendingAction: "DELETE"}
+          : s
+      )
     
     case "SYNC_SUCCESS":
-      return state.map(s =>
-        s.id === action.payload ? { ...s, pending: false } : s
-      )
+      return state
+        .map(s =>
+          s.id === action.payload
+            ? { ...s, pendingAction: undefined }
+            : s
+        )
+        .filter(s => s.pendingAction !== "DELETE"); //remove after server sends ok
     
     default:
       return state;
     
+  };
+}
+
+
+function formatToBackend(score : ScoreWithPending) {
+  return {
+    id: score.id,
+    student_id: score.studentId,
+    subject: score.subject,
+    type: score.type,
+    ...(score.type === "summative" && {
+      summative_no: score.summativeNo
+    }),
+    score: score.score,
   };
 }
 
@@ -93,7 +112,7 @@ export function ScoresProvider({ children }: { children: React.ReactNode }) {
 
 
   //local first
-    const fetchScores = async (local: ScoreWithPending[]) => {
+    const fetchScores = async () => {
     try {
       const res = await fetch(API);
       const data = await res.json();
@@ -143,44 +162,57 @@ export function ScoresProvider({ children }: { children: React.ReactNode }) {
     const local: ScoreWithPending[] = loadScores();
     dispatch({ type: "SET_LOCAL", payload: local });
 
-    fetchScores(local);
+    fetchScores();
 
   }, []);
 
 
   // sync attempt
   useEffect(() => {
-    scores
-      .filter(s => s.pending)
-      .forEach(async (score) => {
-        try {
-          await fetch(API, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              id: score.id,
-              student_id: score.studentId,
-              subject: score.subject,
-              type: score.type,
-              ...(score.type === "summative" && {
-                summative_no: score.summativeNo
-              }),
-              score: score.score,
-            }),
-          });
+    const pending = scores.filter(s => s.pendingAction);
 
-          dispatch({ type: "SYNC_SUCCESS", payload: score.id });
+    if (pending.length === 0)
+    
+    pending.forEach(async (score) => {
+
+        try {
+
+          if (score.pendingAction === "ADD") {
+            await fetch(API, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(formatToBackend(score))
+            })
+          }
+
+          if (score.pendingAction === "UPDATE") {
+            await fetch(`${API}/${score.id}`, {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(formatToBackend(score)),
+            });
+          }
+
+          if (score.pendingAction === "DELETE") {
+            await fetch(`${API}/${score.id}`, {
+              method: "DELETE",
+            })
+          }
+
+          dispatch({ type: "SYNC_SUCCESS", payload: score.id})
 
         } catch (error) {
-          console.error("Sync failed");
+          console.error("Sync failed:", score.pendingAction, score.id);
         }
       });
   }, [scores]);
 
-  // persist on change
+  // persist on change and safve on local
   useEffect(() => {
     saveScores(scores)
   }, [scores])
+
+
 
   function addScore(score: Score) {
     dispatch({ type: "ADD", payload: score});
