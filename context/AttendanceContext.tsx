@@ -1,11 +1,12 @@
-import { createContext, useContext, useEffect, useState } from "react";
-import { AttendanceRecord } from "../types/attendance";
+import { createContext, useContext, useEffect, useReducer, useState } from "react";
+import { Attendance } from "../types/attendance";
 import { loadAttendance, saveAttendance } from "../storage/attendanceStorage";
 
 type AttendanceContextValue = {
-  records: AttendanceRecordWithPending[],
-  addRecord: (record: AttendanceRecord) => void,
-  updateRecord: (record: AttendanceRecord) => void
+  attendance: AttendanceWithPending[],
+  addAttendance: (attendance: Attendance) => void,
+  updateAttendance: (attendance: Attendance) => void,
+  deleteAttendance: (id: string) => void,
 }
 
 type AttendanceSupabase = {
@@ -16,15 +17,15 @@ type AttendanceSupabase = {
   user_id: string, 
 }
 
-type AttendanceRecordWithPending = AttendanceRecord & {
-  pendingAction: "ADD" | "UPDATE" | "DELETE"
+type AttendanceWithPending = Attendance & {
+  pendingAction?: "ADD" | "UPDATE" | "DELETE"
 }
 
 type Action =
-| { type: "SET_LOCAL", payload: AttendanceRecordWithPending[] }
-| { type: "MERGE_REMOTE", payload: AttendanceRecord[] }
-| { type: "ADD", payload: AttendanceRecord }
-| { type: "UPDATE", payload: AttendanceRecord }
+| { type: "SET_LOCAL", payload: AttendanceWithPending[] }
+| { type: "MERGE_REMOTE", payload: Attendance[] }
+| { type: "ADD", payload: Attendance }
+| { type: "UPDATE", payload: Attendance }
 | { type: "DELETE", payload: string }
 | { type: "SYNC_SUCCESS", payload: string }
 
@@ -39,9 +40,9 @@ const AttendanceContext = createContext<AttendanceContextValue | null>(null);
 
 //REDUCER
 const attendanceReducer = (
-  state: AttendanceRecordWithPending[],
+  state: AttendanceWithPending[],
   action: Action
-): AttendanceRecordWithPending[] => {
+): AttendanceWithPending[] => {
   switch (action.type) {
 
     case "SET_LOCAL":
@@ -53,55 +54,86 @@ const attendanceReducer = (
       action.payload.forEach(s => {
         const local = map.get(s.id);
 
-        
-      })
+        if (!local) {
+          map.set(s.id, s);
+        } else if (local.pendingAction === "DELETE") {
 
+          return;
+        }
+      });
+
+      return Array.from(map.values());
     }
-  }
 
-  return []
+    case "ADD":
+      return [...state, {...action.payload, pendingAction: "ADD"}];
+    
+    case "UPDATE":
+      return state.map(s => {
+        if (s.id !== action.payload.id) return s;
+
+        if (s.pendingAction === "DELETE") return s;
+
+        return { ...action.payload, pendingAction: "UPDATE" };
+      });
+
+    case "DELETE":
+      return state.map(s =>
+        s.id === action.payload
+          ? { ...s, pendingAction: "DELETE"}
+          : s
+      )
+    
+    case "SYNC_SUCCESS":
+      return state
+        .map(s =>
+          s.id === action.payload
+            ? { ...s, pendingAction: undefined }
+            : s
+        )
+        .filter(s => s.pendingAction !== "DELETE");
+    
+    default:
+      return state;
+
+  }
+}
+
+
+function formatToBackend(attendance: AttendanceWithPending) {
+  return {
+    id: attendance.id,
+    student_id: attendance.studentId ,
+    date: attendance.date ?? new Date().toISOString(),
+    status: attendance.status,
+  }
 }
 
 
 
-
 export function AttendanceProvider({ children }: { children: React.ReactNode }) {
-  const [records, setRecords] = useState<AttendanceRecordWithPending[]>([]);
+  const [attendance, dispatch] = useReducer(attendanceReducer, []);
+
 
   //local first
-  const fetchAttendance = async (local: AttendanceRecordWithPending[]) => {
+  const fetchAttendance = async () => {
     try {
       const res = await fetch(API);
       const data: AttendanceSupabase[] = await res.json();
 
       //format to match frontend
-      const formatted: AttendanceRecord[] = data.map((a) => ({
+      const formatted: Attendance[] = data.map((a) => ({
         id: a.id,
         studentId: a.student_id,
         date: a.date,
         status: a.status
       }))
 
-      const merged = mergeAttendance(local, formatted);
-      setRecords(merged);
+      dispatch({ type: "MERGE_REMOTE", payload: formatted });
 
     } catch(error) {
       console.error("Fetch error", error);
     }
-  }
-
-  //merging attendance both offline and online
-  function mergeAttendance(local: AttendanceRecord[], remote: AttendanceRecord[]): AttendanceRecord[] {
-    
-    const map = new Map(local.map(a => [a.id, a]));
-
-    remote.forEach(a => {
-      if (!map.has(a.id)) {
-        map.set(a.id, a);
-      }
-    });
-
-    return(Array.from(map.values()));
   }
 
 
@@ -109,60 +141,83 @@ export function AttendanceProvider({ children }: { children: React.ReactNode }) 
   //offline-first
   useEffect(() => {
 
-    const local: AttendanceRecordWithPending[] = loadAttendance();
-    setRecords(local);
+    const local: AttendanceWithPending[] = loadAttendance();
+    dispatch({ type: "SET_LOCAL", payload: local });
 
-    fetchAttendance(local);
-
-
-    //retry local syncing to online
-    local
-      .filter(a => a.pending)
-      .forEach(async (attendance) => {
-        try {
-          await fetch(API, {
-            method: "POST",
-            headers: { "Content-Type": "application/json"},
-            body: JSON.stringify({
-              id: attendance.id,
-              student_id: attendance.studentId,
-              date: attendance.date,
-              status: attendance.status,
-            })
-          })
-
-          setRecords(prev =>
-            prev.map( a =>
-              a.id === attendance.id ? { ...a, pending: false } : a
-            )
-          )
-
-        } catch(error) {
-          console.error("Failed to update")
-        }
-      })
+    fetchAttendance();
 
   }, [])
 
+  //sync attempt
   useEffect(() => {
-    saveAttendance(records)
-  }, [records])
+    const sync = async () => {
+      const pending = attendance.filter(a => a.pendingAction);
+      if (pending.length === 0) return;
 
-  function addRecord(record: AttendanceRecord) {
-    setRecords(prev => [...prev, { ...record, pending: true }])
+      for (const item of pending) {
+        try {
+          if (item.pendingAction === "ADD") {
+            await fetch(API, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(formatToBackend(item)),
+            });
+          }
+
+          if (item.pendingAction === "UPDATE") {
+            await fetch(`${API}/${item.id}`, {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(formatToBackend(item)),
+            });
+          }
+
+          if (item.pendingAction === "DELETE") {
+            await fetch(`${API}/${item.id}`, {
+              method: "DELETE",
+            });
+          }
+
+          dispatch({ type: "SYNC_SUCCESS", payload: item.id });
+
+        } catch (error) {
+          console.error("Sync failed", item.pendingAction, item.id);
+        }
+      }
+    };
+
+  sync();
+}, [attendance]);
+
+
+
+
+  useEffect(() => {
+    saveAttendance(attendance)
+  }, [attendance])
+
+
+
+
+  function addAttendance(attendance: Attendance) {
+    dispatch({ type: "ADD", payload: attendance })
   }
 
-  function updateRecord(updated: AttendanceRecord) {
-    setRecords(prev =>
-      prev.map(r =>
-        r.id === updated.id
-          ? { ...updated, pending: true } // mark for resync
-          : r
-      )
-    )
+  function updateAttendance(attendance: Attendance) {
+    dispatch({ type: "UPDATE", payload: attendance});
   }
+
+  function deleteAttendance(id: string) {
+    dispatch({ type: "DELETE", payload: id });
+  }
+
+
+
+
   return (
-    <AttendanceContext.Provider value={{ records, addRecord, updateRecord }}>
+    <AttendanceContext.Provider 
+      value={{ attendance, addAttendance, updateAttendance, deleteAttendance }}
+    >
       {children}
     </AttendanceContext.Provider>
   )

@@ -10,6 +10,16 @@ type ScoresContextValue = {
   deleteScore: (id: string) => void,
 }
 
+type ScoreSupabase = {
+    id: string,
+    student_id: string,
+    subject: string,
+    type: "summative" | "performance" | "quarterly",
+    summative_no?: number,
+    score: number,
+}
+
+
 type ScoreWithPending = Score & {
   pendingAction?: "ADD" | "UPDATE" | "DELETE"
 }
@@ -115,7 +125,7 @@ export function ScoresProvider({ children }: { children: React.ReactNode }) {
     const fetchScores = async () => {
     try {
       const res = await fetch(API);
-      const data = await res.json();
+      const data: ScoreSupabase[] = await res.json();
 
       const formatted: Score[] = data.map((s: any) => {
         if (s.type === "summative") {
@@ -169,20 +179,18 @@ export function ScoresProvider({ children }: { children: React.ReactNode }) {
 
   // sync attempt
   useEffect(() => {
-    const pending = scores.filter(s => s.pendingAction);
+    const sync = async () => {
+      const pending = scores.filter(s => s.pendingAction);
+      if (pending.length === 0) return;
 
-    if (pending.length === 0)
-    
-    pending.forEach(async (score) => {
-
+      for (const score of pending) {
         try {
-
           if (score.pendingAction === "ADD") {
             await fetch(API, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(formatToBackend(score))
-            })
+              body: JSON.stringify(formatToBackend(score)),
+            });
           }
 
           if (score.pendingAction === "UPDATE") {
@@ -196,15 +204,18 @@ export function ScoresProvider({ children }: { children: React.ReactNode }) {
           if (score.pendingAction === "DELETE") {
             await fetch(`${API}/${score.id}`, {
               method: "DELETE",
-            })
+            });
           }
 
-          dispatch({ type: "SYNC_SUCCESS", payload: score.id})
+          dispatch({ type: "SYNC_SUCCESS", payload: score.id });
 
         } catch (error) {
           console.error("Sync failed:", score.pendingAction, score.id);
         }
-      });
+      }
+    };
+
+    sync();
   }, [scores]);
 
   // persist on change and safve on local

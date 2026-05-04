@@ -1,6 +1,6 @@
 export type AttendanceStatus = "present" | "absent" | "late";
 
-export interface AttendanceRecord {
+export interface Attendance {
     id: string,
     studentId: string,
     date: string //yyyy-mm-dd
