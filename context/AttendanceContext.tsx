@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useReducer, useState } from "react";
+import { createContext, useContext, useEffect, useReducer } from "react";
 import { Attendance } from "../types/attendance";
 import { loadAttendance, saveAttendance } from "../storage/attendanceStorage";
 
@@ -119,6 +119,11 @@ export function AttendanceProvider({ children }: { children: React.ReactNode }) 
   const fetchAttendance = async () => {
     try {
       const res = await fetch(API);
+
+      if (!res.ok) {
+        throw new Error("Failed request");
+      }
+      
       const data: AttendanceSupabase[] = await res.json();
 
       //format to match frontend
@@ -186,8 +191,8 @@ export function AttendanceProvider({ children }: { children: React.ReactNode }) 
       }
     };
 
-  sync();
-}, [attendance]);
+    sync();
+  }, [attendance]);
 
 
 
