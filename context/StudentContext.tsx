@@ -1,13 +1,16 @@
-import { createContext, useContext, useEffect, useReducer } from "react";
+import { createContext, useContext, useEffect, useReducer, useState } from "react";
 import { Student } from "../types/student";
 import { loadStudents, saveStudents } from "../storage/studentStorage";
 
 
 type StudentContextValue = {
-  students: StudentWithPending[]
-  addStudent: (student: Student) => void
+  students: StudentWithPending[],
+  loading: boolean,
+  error: string | null,
+
+  addStudent: (student: Student) => void,
   updateStudent: (student: Student) => void,
-  deleteStudent: (id: string) => void
+  deleteStudent: (id: string) => void,
 }
 
 //
@@ -39,7 +42,7 @@ const API = "http://localhost:5000/api/students/";
 
 
 
-const StudentContext = createContext<StudentContextValue | null>(null);
+export const StudentContext = createContext<StudentContextValue | null>(null);
 
 
 //REDUCER
@@ -86,11 +89,16 @@ const studentReducer = (
       });
 
     case "DELETE":
-      return state.map(s =>
-        s.id === action.payload
-          ? { ...s, pendingAction: "DELETE"}
-          : s
-      )
+      return state.flatMap(s => {
+        if (s.id !== action.payload) return [s];
+
+        // never synced yet → remove immediately
+        if (s.pendingAction === "ADD") {
+          return [];
+        }
+
+        return [{ ...s, pendingAction: "DELETE" }];
+      });
     
     case "SYNC_SUCCESS":
       return state
@@ -126,13 +134,23 @@ function formatToBackend(student: StudentWithPending) {
 
 export function StudentProvider({ children }: { children: React.ReactNode }) {
   const [students, dispatch] = useReducer(studentReducer, []);
-
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null)
 
 
   //local first
   const fetchStudents = async () => {
     try {
+
+      setLoading(true);
+      setError(null);
+
       const res = await fetch(API);
+
+      if (!res.ok) {
+        throw new Error("Failed request");
+      }
+
       const data: StudentSupabase[] = await res.json();
 
       //format to match frontend
@@ -148,8 +166,12 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
 
       dispatch({ type: "MERGE_REMOTE", payload: formatted });
 
-    } catch (error) {
+    } catch (error: any) {
+      setError(error.message);
       console.error("Fetch error:", error);
+
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -226,7 +248,16 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
 
 
   return (
-    <StudentContext.Provider value={{ students, addStudent, updateStudent, deleteStudent }}>
+    <StudentContext.Provider 
+    value={{ 
+      students, 
+      loading,
+      error,
+      addStudent, 
+      updateStudent, 
+      deleteStudent 
+    }}
+    >
       {children}
     </StudentContext.Provider>
   )

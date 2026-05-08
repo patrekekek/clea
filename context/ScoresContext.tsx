@@ -5,6 +5,9 @@ import { loadScores, saveScores } from "../storage/scoresStorage"
 
 type ScoresContextValue = {
   scores: ScoreWithPending[],
+  loading: boolean,
+  error: string |null,
+
   addScore: (score: Score) => void,
   updateScore: (score: Score) => void,
   deleteScore: (id: string) => void,
@@ -119,12 +122,23 @@ function formatToBackend(score : ScoreWithPending) {
 
 export function ScoresProvider({ children }: { children: React.ReactNode }) {
   const [scores, dispatch] = useReducer(scoresReducer, []);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null)
 
 
   //local first
     const fetchScores = async () => {
     try {
+
+      setLoading(true);
+      setError(null);
+
       const res = await fetch(API);
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch scores")
+      }
+
       const data: ScoreSupabase[] = await res.json();
 
       const formatted: Score[] = data.map((s: any) => {
@@ -160,8 +174,13 @@ export function ScoresProvider({ children }: { children: React.ReactNode }) {
 
       dispatch({ type: "MERGE_REMOTE", payload: formatted });
 
-    } catch (error) {
+
+    } catch (error: any) {
+      setError(error.message)
       console.error("Fetch error:", error);
+
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -239,7 +258,14 @@ export function ScoresProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <ScoresContext.Provider
-      value={{ scores, addScore, updateScore, deleteScore }}
+      value={{ 
+        scores, 
+        loading, 
+        error, 
+        addScore, 
+        updateScore, 
+        deleteScore 
+      }}
     >
       {children}
     </ScoresContext.Provider>

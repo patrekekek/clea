@@ -8,15 +8,17 @@ import RollCallScreen from './RollCallScreen';
 //context
 import { useStudents } from '../../context/StudentContext';
 
+//hooks
+import { useScoresContext } from '../../hooks/useScoresContext';
+
 import { colors, spacing, typography } from "../../theme"
 import Button from '../ui/Button';
-import { useScores } from '../../context/ScoresContext';
 import ScoreSummaryView from '../../features/scores/ScoreSummaryView';
 
 
 export default function ScoreMVP() {
   const { students } = useStudents();
-  const { scores, addScore, updateScore, deleteScore } = useScores();
+  const { scores, loading, error, addScore, updateScore, deleteScore } = useScoresContext();
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
   const [selectedTest, setSelectedTest] = useState<string>("");
   const [isRecording, setIsRecording] = useState<boolean>(false);
@@ -26,7 +28,7 @@ export default function ScoreMVP() {
   const tests = ["Summative 1", "Summative 2", "Summative 3", "Summative 4", "Performance", "Quarterly"]
 
   console.log("scores", scores);
-  console.log(selectedSection, selectedTest);
+  console.log(selectedSection, selectedTest); 
   
 
   // filter students by section

@@ -35,7 +35,7 @@ const API = "http://localhost:5000/api/attendance/"
 
 
 
-const AttendanceContext = createContext<AttendanceContextValue | null>(null);
+export const AttendanceContext = createContext<AttendanceContextValue | null>(null);
 
 
 //REDUCER

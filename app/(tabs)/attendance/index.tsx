@@ -27,7 +27,7 @@ export default function AttendancePage() {
       {/* Summary Section */}
       <View style={styles.card}>
         <Text style={styles.sectionTitle}>Attendance Summary</Text>
-        <AttendanceSummaryView />
+        {/* <AttendanceSummaryView /> */}
       </View>
     </AppContainer>
   )

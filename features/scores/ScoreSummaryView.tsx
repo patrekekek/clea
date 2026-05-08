@@ -2,14 +2,17 @@ import { View, Text, StyleSheet } from "react-native";
 import { useMemo } from "react";
 
 import { useStudents } from "../../context/StudentContext";
-import { useScores } from "../../context/ScoresContext";
+
+//hooks
+import { useStudentContext } from "../../hooks/useStudentContext";
+import { useScoresContext } from "../../hooks/useScoresContext";
 
 import { colors, spacing, typography } from "../../theme";
 import Card from "../../components/ui/Card";
 
 export default function ScoreSummaryView() {
-  const { students } = useStudents();
-  const { scores } = useScores();
+  const { students } = useStudentContext();
+  const { scores } = useScoresContext();
 
   const scoreMap = useMemo(() => {
     const map: Record<

@@ -1,8 +1,8 @@
-import { AttendanceRecord } from "../types/attendance";
+import { Attendance } from "../types/attendance";
 
 const STORAGE_KEY = "clea_attendance";
 
-export function loadAttendance(): AttendanceRecord[] {
+export function loadAttendance(): Attendance[] {
     try {
         const raw = localStorage.getItem(STORAGE_KEY);
         return raw ? JSON.parse(raw) : []
@@ -11,6 +11,6 @@ export function loadAttendance(): AttendanceRecord[] {
     }
 }
 
-export function saveAttendance(records: AttendanceRecord[]):void {
+export function saveAttendance(records: Attendance[]):void {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(records))
 }
