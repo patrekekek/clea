@@ -8,6 +8,6 @@ export const useStudentContext = () => {
         throw Error('useStudentContext must be used inside the Student Context Provider');
     }
 
-    return context;
+    return context; 
 
 }

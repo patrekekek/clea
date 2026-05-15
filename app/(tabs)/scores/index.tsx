@@ -1,8 +1,6 @@
-import { useState } from "react"
 import { Text, StyleSheet } from "react-native"
 
 import { colors } from "../../../theme/colors"
-
 
 
 //components

@@ -1,89 +1,105 @@
-import { View, Text, FlatList, StyleSheet } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+
 import { useLocalSearchParams } from "expo-router";
 
-import { useStudents } from "../../../context/StudentContext";
-import { loadSections } from "../../../storage/sectionStorage";
-
-import { useEffect, useState } from "react";
-import { Section } from "../../../storage/sectionStorage";
+import { useEffect, useMemo, useState } from "react";
 
 import AppContainer from "../../../components/AppContainer";
 import AppHeader from "../../../components/AppHeader";
+
+import SectionStudentList from "../../../components/sections/SectionStudentList";
+
+import { useStudents } from "../../../context/StudentContext";
+
+import {
+  loadSections,
+  Section,
+} from "../../../storage/sectionStorage";
 
 import { colors } from "../../../theme/colors";
 
 export default function SectionDetailPage() {
   const { id } = useLocalSearchParams<{ id: string }>();
+
   const { students } = useStudents();
 
   const [section, setSection] = useState<Section | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function load() {
-      const all = await loadSections();
-      const found = all.find(s => s.id === id);
-      setSection(found || null);
+    async function fetchSection() {
+      try {
+        const allSections = await loadSections();
+
+        const foundSection = allSections.find(
+          section => section.id === id
+        );
+
+        setSection(foundSection || null);
+      } catch (error) {
+        console.log("Failed to load section", error);
+      } finally {
+        setLoading(false);
+      }
     }
 
-    load();
+    fetchSection();
   }, [id]);
 
-  // 🔥 filter students for this section
-  const filteredStudents = students
-    .filter(s => s.section === section?.name)
-    .sort((a, b) => a.lastName.localeCompare(b.lastName));
+  const filteredStudents = useMemo(() => {
+    if (!section) return [];
+
+    return students
+      .filter(
+        student => student.section === section.name
+      )
+      .sort((a, b) =>
+        a.lastName.localeCompare(b.lastName)
+      );
+  }, [students, section]);
 
   return (
     <AppContainer>
       <AppHeader />
 
-      <Text style={styles.title}>
-        {section?.name || "Section"}
-      </Text>
+      <View style={styles.container}>
+        <Text style={styles.title}>
+          {section?.name || "Section"}
+        </Text>
 
-      <FlatList
-        data={filteredStudents}
-        keyExtractor={item => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.card}>
-            <Text style={styles.name}>
-              {item.lastName}, {item.firstName}
-            </Text>
-
-            {item.pending && (
-              <Text style={styles.pending}>Not synced</Text>
-            )}
-          </View>
-        )}
-        ListEmptyComponent={
-          <Text style={{ textAlign: "center", marginTop: 20 }}>
-            No students in this section
+        {loading ? (
+          <Text style={styles.message}>
+            Loading...
           </Text>
-        }
-      />
+        ) : (
+          <SectionStudentList
+            students={filteredStudents}
+          />
+        )}
+      </View>
     </AppContainer>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 16,
+  },
+
   title: {
     fontSize: 24,
     fontWeight: "600",
-    marginBottom: 16,
+    marginBottom: 20,
   },
-  card: {
-    backgroundColor: colors.surface,
-    padding: 16,
-    borderRadius: 10,
-    marginBottom: 10,
-  },
-  name: {
-    fontSize: 16,
-    fontWeight: "500",
-  },
-  pending: {
-    fontSize: 12,
-    color: "orange",
-    marginTop: 4,
+
+  message: {
+    textAlign: "center",
+    marginTop: 20,
+    color: colors.textSecondary,
   },
 });
