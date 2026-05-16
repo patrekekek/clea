@@ -1,64 +1,80 @@
 import { useMemo, useState } from "react";
 import { View, Text, Pressable, StyleSheet } from "react-native";
+
 import { AttendanceStatus } from "../../types/attendance";
+
 import { useAttendance } from "../../context/AttendanceContext";
 import { useStudents } from "../../context/StudentContext";
 
 import Card from "../ui/Card";
 import Button from "../ui/Button";
+
 import { colors, spacing, typography } from "../../theme";
 
 const today = () => new Date().toISOString().slice(0, 10);
 
-
 export default function AttendanceMVP() {
-  const { records, addRecord, updateRecord } = useAttendance();
+  const { attendance, addAttendance, updateAttendance } = useAttendance();
+
   const { students } = useStudents();
 
+  console.log("attendance", attendance)
+
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
+
   const [index, setIndex] = useState(0);
 
-  // get unique sections
+  // =========================
+  // UNIQUE SECTIONS
+  // =========================
   const sections = useMemo(() => {
     return [...new Set(students.map((s) => s.section))];
   }, [students]);
 
-  // filter students by section
+  // =========================
+  // STUDENTS BY SECTION
+  // =========================
   const sortedStudents = useMemo(() => {
     if (!selectedSection) return [];
 
     return students
       .filter((s) => s.section === selectedSection)
       .sort((a, b) => {
-        // 1. male first
+        // male first
         if (a.sex !== b.sex) {
           return a.sex === "m" ? -1 : 1;
         }
 
-        // 2. then alphabetical
+        // alphabetical
         return `${a.lastName} ${a.firstName}`.localeCompare(
           `${b.lastName} ${b.firstName}`
         );
       });
-
   }, [students, selectedSection]);
 
   const currentStudent = sortedStudents[index];
 
-  //recordAttendance
+  // =========================
+  // RECORD ATTENDANCE
+  // =========================
   function recordAttendance(status: AttendanceStatus) {
     if (!currentStudent) return;
 
     const date = today();
 
-    const existing = records.find(
-      (r) => r.studentId === currentStudent.id && r.date  === date
+    const existing = attendance.find(
+      (a) =>
+        a.studentId === currentStudent.id &&
+        a.date === date
     );
 
     if (existing) {
-      updateRecord({ ...existing, status });
+      updateAttendance({
+        ...existing,
+        status,
+      });
     } else {
-      addRecord({
+      addAttendance({
         id: crypto.randomUUID(),
         studentId: currentStudent.id,
         date,
@@ -69,18 +85,16 @@ export default function AttendanceMVP() {
     setIndex((prev) => prev + 1);
   }
 
-  //reset
+  // =========================
+  // RESET
+  // =========================
   function reset() {
     setIndex(0);
     setSelectedSection(null);
   }
 
-
-
-
-
   // =========================
-  // SECTION SELECT SCREEN
+  // SECTION SCREEN
   // =========================
   if (!selectedSection) {
     return (
@@ -117,7 +131,10 @@ export default function AttendanceMVP() {
         </Text>
 
         <View style={styles.header}>
-          <Button title="Take Another Section" onPress={reset} />
+          <Button
+            title="Take Another Section"
+            onPress={reset}
+          />
         </View>
       </Card>
     );
@@ -132,43 +149,41 @@ export default function AttendanceMVP() {
         {selectedSection.toUpperCase()}
       </Text>
 
-      {/* student card */}
-      <View
-        style={styles.studentCard}
-      >
+      {/* STUDENT CARD */}
+      <View style={styles.studentCard}>
         <Text style={{ color: colors.textSecondary }}>
           {index + 1} / {sortedStudents.length}
         </Text>
 
-        <Text
-          style={styles.studentCardText}
-        >
-          {currentStudent.firstName} {currentStudent.lastName}
+        <Text style={styles.studentCardText}>
+          {currentStudent.firstName}{" "}
+          {currentStudent.lastName}
         </Text>
       </View>
 
-      {/* buttons */}
-      <View 
-        style={styles.buttonContainer}
-      >
-        {(["present", "late", "absent"] as AttendanceStatus[]).map((s) => {
+      {/* BUTTONS */}
+      <View style={styles.buttonContainer}>
+        {(
+          ["present", "late", "absent"] as AttendanceStatus[]
+        ).map((status) => {
           const bg =
-            s === "present"
+            status === "present"
               ? "green"
-              : s === "late"
+              : status === "late"
               ? "orange"
               : "red";
 
           return (
             <Pressable
-              key={s}
-              onPress={() => recordAttendance(s)}
-              style={[{backgroundColor: bg,}, styles.attendanceButton]}
+              key={status}
+              onPress={() => recordAttendance(status)}
+              style={[
+                styles.attendanceButton,
+                { backgroundColor: bg },
+              ]}
             >
-              <Text
-                style={styles.attendanceText}
-              >
-                {s}
+              <Text style={styles.attendanceText}>
+                {status}
               </Text>
             </Pressable>
           );
@@ -179,8 +194,8 @@ export default function AttendanceMVP() {
 }
 
 const styles = StyleSheet.create({
-  header: { 
-    marginBottom: spacing.md 
+  header: {
+    marginBottom: spacing.md,
   },
 
   option: {
@@ -192,7 +207,7 @@ const styles = StyleSheet.create({
   },
 
   optionText: {
-    fontWeight: "600"
+    fontWeight: "600",
   },
 
   studentCard: {
@@ -210,9 +225,9 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
 
-  buttonContainer: { 
+  buttonContainer: {
     flexDirection: "row",
-    gap: spacing.sm 
+    gap: spacing.sm,
   },
 
   attendanceButton: {
@@ -223,11 +238,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     height: 70,
   },
-  
+
   attendanceText: {
     color: "white",
     fontWeight: "900",
     textTransform: "capitalize",
   },
-  
-})
+});

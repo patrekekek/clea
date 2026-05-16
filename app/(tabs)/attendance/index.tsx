@@ -5,9 +5,9 @@ import AttendanceMVP from "../../../components/attendance/AttendanceMVP";
 import AppContainer from "../../../components/AppContainer";
 import AppHeader from "../../../components/AppHeader";
 import TopTabs from "../../../components/TopTabs";
-
+import AttendanceSummaryTable from "../../../components/attendance/AttendanceSummaryTable";
 import { colors } from "../../../theme/colors";
-import AttendanceSummaryView from "../../../features/attendance/AttendanceSummaryView";
+
 
 export default function AttendancePage() {
 
@@ -27,7 +27,7 @@ export default function AttendancePage() {
       {/* Summary Section */}
       <View style={styles.card}>
         <Text style={styles.sectionTitle}>Attendance Summary</Text>
-        {/* <AttendanceSummaryView /> */}
+        <AttendanceSummaryTable />
       </View>
     </AppContainer>
   )
