@@ -71,6 +71,7 @@ export default function AttendanceSummaryTable() {
 
         {/* STUDENTS */}
         {sortedStudents.map((student) => {
+
           return (
             <View key={student.id} style={styles.row}>
               {/* NAME */}
