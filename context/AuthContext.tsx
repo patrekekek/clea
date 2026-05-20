@@ -43,10 +43,35 @@ interface AuthContextType {
     password: string
   ) => Promise<void>;
 
+  signUp: (data: {
+    email: string,
+    password: string,
+
+    firstName: string,
+    lastName: string,
+
+    middleName?: string,
+
+    role: UserRole;
+
+    subject?: string
+  }) => Promise<void>
+
   signOut: () => Promise<void>;
 
   refreshUser: () => Promise<void>;
 }
+
+export type SignUpType = {
+  email: string,
+  password: string,
+  firstName: string,
+  lastName: string,
+  middleName?: string,
+  role: UserRole,
+  subject?: string
+}
+
 
 const AuthContext =
   createContext<AuthContextType | null>(null);
@@ -58,14 +83,9 @@ interface AuthProviderProps {
 export function AuthProvider({
   children,
 }: AuthProviderProps) {
-  const [user, setUser] =
-    useState<UserProfile | null>(null);
-
-  const [session, setSession] =
-    useState<Session | null>(null);
-
-  const [loading, setLoading] =
-    useState(true);
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const fetchUserProfile = async (
     authUser: SupabaseUser
@@ -131,6 +151,49 @@ export function AuthProvider({
     }
   };
 
+  const signUp = async ({
+    email,
+    password,
+    firstName,
+    lastName,
+    middleName,
+    role,
+    subject
+  } : SignUpType ): Promise<void> => {
+
+    // create auth account
+    const { data, error } = await supabase.auth.signUp({ email, password });
+
+    if (error) {
+      throw error;
+    }
+
+    if (!data.user) {
+      throw new Error("User not created");
+    }
+
+    // create profile
+    const { error: profileError } = await supabase
+      .from("profiles")
+      .insert({
+        id: data.user.id,
+
+        first_name: firstName,
+        last_name: lastName,
+        middle_name: middleName,
+
+        role,
+        subject,
+
+        created_at: new Date().toISOString(),
+      });
+
+    if (profileError) {
+      throw profileError;
+    }
+
+  }
+
   const signOut = async () => {
     const { error } =
       await supabase.auth.signOut();
@@ -188,6 +251,7 @@ export function AuthProvider({
         session,
         loading,
         signIn,
+        signUp,
         signOut,
         refreshUser,
       }}
