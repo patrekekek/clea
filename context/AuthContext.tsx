@@ -261,6 +261,7 @@ export function AuthProvider({
   );
 }
 
+// will be transformed into hook soon
 export const useAuth = () => {
   const context =
     useContext(AuthContext);

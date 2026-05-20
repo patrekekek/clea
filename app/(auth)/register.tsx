@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+
 import {
   View,
   Text,
@@ -7,166 +8,326 @@ import {
   StyleSheet,
   Image,
   ScrollView,
+  Alert
 } from "react-native";
+
 import { router } from "expo-router";
 
+import { useAuth } from "../../context/AuthContext";
+
+import { UserRole } from "../../context/AuthContext"
+
+
 export default function Register() {
+
+  const { signUp } = useAuth();
+
+  const [loading, setLoading] = useState(false);
+
   const [form, setForm] = useState({
     firstName: "",
     middleName: "",
     lastName: "",
-    username: "",
-    department: "",
-    position: "",
-    salary: "",
+
     email: "",
+
     password: "",
     confirmPassword: "",
+
+    role: "teacher" as UserRole, //not type safe yet, fix soon hehehhehe
+
+    subject: "",
   });
 
   const update = (key: string, value: string) => {
-    setForm({ ...form, [key]: value });
+    setForm( prev => ({
+      ...prev,
+      [key]: value,
+    }));
   };
 
-  const handleRegister = () => {
-    router.replace("/(tabs)");
+  const handleRegister = async () => {
+
+    if (!form.firstName || !form.lastName || !form.email || !form.password) {
+      Alert.alert(
+        "missing fields",
+        "Please complete details"
+      );
+      return;
+    }
+
+    if ( form.password !== form.confirmPassword ) {
+      Alert.alert (
+        "password mismatch",
+        "Passwords do not match."
+      )
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      await signUp({
+        email: form.email,
+        password: form.password,
+
+        firstName: form.firstName,
+        lastName: form.lastName,
+
+        middleName: form.middleName,
+
+        role: form.role,
+
+        subject: form.subject,
+      });
+
+      Alert.alert(
+        "success",
+        "Account created successfully."
+      );
+
+      router.replace("/login")
+
+    } catch (error: any) {
+
+      Alert.alert(
+        "Registration failed",
+        error.message
+      )
+
+    } finally {
+
+      setLoading(false);
+    }
+
+
+
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Register ta, cher</Text>
-      <Text style={styles.subtitle}>
-        Fill in the details to create your account
-      </Text>
+      <ScrollView
+        contentContainerStyle={
+          styles.container
+        }
+      >
 
-      <View style={styles.card}>
-        {/* LEFT ILLUSTRATION */}
-        <View style={styles.left}>
-          <Image
-            source={require("../../assets/register.png")}
-            style={styles.image}
-            resizeMode="contain"
-          />
-        </View>
+        <Text style={styles.title}>
+          Create Account
+        </Text>
 
-        {/* RIGHT FORM */}
-        <View style={styles.form}>
-          {/* NAME ROW */}
-          <View style={styles.row}>
-            <View style={styles.col}>
-              <Text style={styles.label}>First Name *</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="First Name"
-                onChangeText={(v) => update("firstName", v)}
-              />
-            </View>
+        <Text style={styles.subtitle}>
+          Register your CLEA account
+        </Text>
 
-            <View style={styles.col}>
-              <Text style={styles.label}>Middle Name</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Middle Name"
-                onChangeText={(v) => update("middleName", v)}
-              />
-            </View>
+        <View style={styles.card}>
 
-            <View style={styles.col}>
-              <Text style={styles.label}>Last Name *</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Last Name"
-                onChangeText={(v) => update("lastName", v)}
-              />
-            </View>
+          <View style={styles.left}>
+            <Image
+              source={require("../../assets/register.png")}
+              style={styles.image}
+              resizeMode="contain"
+            />
           </View>
 
-          <Text style={styles.label}>Username *</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Username"
-            onChangeText={(v) => update("username", v)}
-          />
+          <View style={styles.form}>
 
-          {/* DEPARTMENT + POSITION */}
-          <View style={styles.row}>
-            <View style={styles.col}>
-              <Text style={styles.label}>Office / Department</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Office / Department"
-                onChangeText={(v) => update("department", v)}
-              />
+            {/* NAME ROW */}
+
+            <View style={styles.row}>
+
+              <View style={styles.col}>
+                <Text style={styles.label}>
+                  First Name *
+                </Text>
+
+                <TextInput
+                  style={styles.input}
+                  value={form.firstName}
+                  placeholder="First Name"
+                  onChangeText={(v) =>
+                    update("firstName", v)
+                  }
+                />
+              </View>
+
+              <View style={styles.col}>
+                <Text style={styles.label}>
+                  Middle Name
+                </Text>
+
+                <TextInput
+                  style={styles.input}
+                  value={form.middleName}
+                  placeholder="Middle Name"
+                  onChangeText={(v) =>
+                    update("middleName", v)
+                  }
+                />
+              </View>
+
+              <View style={styles.col}>
+                <Text style={styles.label}>
+                  Last Name *
+                </Text>
+
+                <TextInput
+                  style={styles.input}
+                  value={form.lastName}
+                  placeholder="Last Name"
+                  onChangeText={(v) =>
+                    update("lastName", v)
+                  }
+                />
+              </View>
+
             </View>
 
-            <View style={styles.col}>
-              <Text style={styles.label}>Position</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Position"
-                onChangeText={(v) => update("position", v)}
-              />
-            </View>
-          </View>
+            {/* EMAIL */}
 
-          {/* SALARY + EMAIL */}
-          <View style={styles.row}>
-            <View style={styles.col}>
-              <Text style={styles.label}>Salary</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Salary"
-                onChangeText={(v) => update("salary", v)}
-              />
-            </View>
-
-            <View style={styles.col}>
-              <Text style={styles.label}>Email *</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Email"
-                onChangeText={(v) => update("email", v)}
-              />
-            </View>
-          </View>
-
-          {/* PASSWORD */}
-          <View style={styles.row}>
-            <View style={styles.col}>
-              <Text style={styles.label}>Password *</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Password"
-                secureTextEntry
-                onChangeText={(v) => update("password", v)}
-              />
-            </View>
-
-            <View style={styles.col}>
-              <Text style={styles.label}>Confirm Password *</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Confirm Password"
-                secureTextEntry
-                onChangeText={(v) => update("confirmPassword", v)}
-              />
-            </View>
-          </View>
-
-          <TouchableOpacity style={styles.button} onPress={handleRegister}>
-            <Text style={styles.buttonText}>Register</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={() => router.push("/login")}>
-            <Text style={styles.login}>
-              Already have an account? Log In
+            <Text style={styles.label}>
+              Email *
             </Text>
-          </TouchableOpacity>
+
+            <TextInput
+              style={styles.input}
+              value={form.email}
+              placeholder="Email"
+              autoCapitalize="none"
+              keyboardType="email-address"
+              onChangeText={(v) =>
+                update("email", v)
+              }
+            />
+
+            {/* ROLE */}
+
+            <Text style={styles.label}>
+              Role *
+            </Text>
+
+            <View style={styles.row}>
+
+              <TouchableOpacity
+                style={styles.roleButton}
+                onPress={() =>
+                  update("role", "teacher")
+                }
+              >
+                <Text>Teacher</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.roleButton}
+                onPress={() =>
+                  update("role", "admin")
+                }
+              >
+                <Text>Admin</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.roleButton}
+                onPress={() =>
+                  update("role", "parent")
+                }
+              >
+                <Text>Parent</Text>
+              </TouchableOpacity>
+
+            </View>
+
+            {/* SUBJECT */}
+
+            <Text style={styles.label}>
+              Subject
+            </Text>
+
+            <TextInput
+              style={styles.input}
+              value={form.subject}
+              placeholder="Math"
+              onChangeText={(v) =>
+                update("subject", v)
+              }
+            />
+
+            {/* PASSWORD */}
+
+            <View style={styles.row}>
+
+              <View style={styles.col}>
+                <Text style={styles.label}>
+                  Password *
+                </Text>
+
+                <TextInput
+                  style={styles.input}
+                  value={form.password}
+                  placeholder="Password"
+                  secureTextEntry
+                  onChangeText={(v) =>
+                    update("password", v)
+                  }
+                />
+              </View>
+
+              <View style={styles.col}>
+                <Text style={styles.label}>
+                  Confirm Password *
+                </Text>
+
+                <TextInput
+                  style={styles.input}
+                  value={form.confirmPassword}
+                  placeholder="Confirm Password"
+                  secureTextEntry
+                  onChangeText={(v) =>
+                    update(
+                      "confirmPassword",
+                      v
+                    )
+                  }
+                />
+              </View>
+
+            </View>
+
+            <TouchableOpacity
+              style={styles.button}
+              onPress={handleRegister}
+              disabled={loading}
+            >
+
+              <Text style={styles.buttonText}>
+                {
+                  loading
+                    ? "Creating..."
+                    : "Register"
+                }
+              </Text>
+
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() =>
+                router.push("/login")
+              }
+            >
+
+              <Text style={styles.login}>
+                Already have an account?
+                Log In
+              </Text>
+
+            </TouchableOpacity>
+
+          </View>
+
         </View>
-      </View>
-    </ScrollView>
-  );
-}
+
+      </ScrollView>
+    );
+  }
 
 const styles = StyleSheet.create({
   container: {
@@ -191,7 +352,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     padding: 25,
     borderRadius: 12,
-    width: 900,
+    width: "100%",
+    maxWidth: 900,
     shadowColor: "#000",
     shadowOpacity: 0.1,
     shadowRadius: 10,
@@ -257,4 +419,21 @@ const styles = StyleSheet.create({
     color: "#2563eb",
     fontSize: 13,
   },
+  roleButton: {
+    flex: 1,
+
+    paddingVertical: 12,
+
+    borderWidth: 1,
+    borderColor: "#D0D5DD",
+
+    borderRadius: 10,
+
+    alignItems: "center",
+    justifyContent: "center",
+
+    backgroundColor: "#FFFFFF",
+
+    marginHorizontal: 4,
+  }
 });
